@@ -1,0 +1,16 @@
+version: '3'
+
+services:
+  postgres:
+    image: "postgres:latest"
+    container_name: localdocker
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: "dev"
+      POSTGRES_USER: "postgres"
+  webapp:
+    image: "iisysdeva/pairwise:latest"
+    container_name: webapp
+    ports:
+        - "7000:7000"

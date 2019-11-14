@@ -1,0 +1,36 @@
+#canvasContainer{
+    border: 1px solid black;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    height: 800px;
+}
+
+#canvasContainer canvas{
+    width: 100%;
+    height: auto;
+}
+
+.spatial-row{
+    margin-left: 0;
+    margin-right: 0;
+}
+
+@media (max-width: 575px)  {
+    #canvasContainer{
+        height: 440px
+    }
+}
+@media (max-width: 767px) and (min-width: 576px) {
+    #canvasContainer{
+        height: 560px
+    }
+}
+@media (max-width: 991px) and (min-width: 768px) {
+    #canvasContainer{
+        height: 720px
+    }
+}
+
+#konvaInspection canvas{
+    border: 1px solid black !important;
+}

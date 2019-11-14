@@ -1,0 +1,11 @@
+.single-concept{
+    margin: 10px 10px 10px 10px;
+    padding: 5px 10px 5px 10px;
+    width: auto;
+    height: 60px;
+    border-style: outset;
+    border-color: lightgray;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
