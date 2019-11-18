@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<migration xmlns="http://ebean-orm.github.io/xml/ns/dbmigration">
+    <changeSet type="apply">
+        <createTable name="settings" identityType="sequence" sequenceAllocate="50" pkName="pk_settings">
+            <column name="max_comps" type="integer" notnull="true"/>
+            <column name="max_spats" type="integer" notnull="true"/>
+            <column name="concepts_per_spat" type="integer" notnull="true"/>
+        </createTable>
+    </changeSet>
+</migration>
