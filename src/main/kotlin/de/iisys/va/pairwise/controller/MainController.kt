@@ -1,5 +1,6 @@
 package de.iisys.va.pairwise.controller
 
+import de.iisys.va.pairwise.GLOB
 import de.iisys.va.pairwise.domain.pair.ComparsionSession
 import de.iisys.va.pairwise.domain.Concept
 import de.iisys.va.pairwise.domain.pair.ConceptComparison
@@ -20,14 +21,15 @@ object MainController {
         val finished = ctx.sessionAttribute<Boolean>("finished") ?: false
         if(init.not()) initSession(ctx) //no running poll for this client yet
         //comparision session is set up
-        if(finished) ctx.redirect("/");
+        if(finished) ctx.redirect("${GLOB.BASE_PATH}/");
         else componentwithProps("poll-view").handle(ctx)
     }
 
     private fun initSession(ctx: Context) {
         //set up domain objects
         val comparsionSession = ComparsionSession()
-        val rand = concept.shuffled().subList(0,12)
+        val endIndex = minOf(Conf.get().maxComps * 2, concept.size)
+        val rand = concept.shuffled().subList(0,endIndex)
         for (i in 0 until rand.size-1 step 2){
             val comp = ConceptComparison().also {
                 it.conceptA = rand[i]

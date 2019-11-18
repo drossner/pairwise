@@ -26,14 +26,31 @@
         <div class="container-fluid">
         <b-navbar toggleable="lg" variant="light" type="light">
             <b-navbar-brand href=".">Pairwise</b-navbar-brand>
+            <b-navbar-nav>
+                <b-button v-b-modal.help-modal size="sm" class="my-2 my-sm-0" variant="outline-secondary">Help</b-button>
+            </b-navbar-nav>
             <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
             <b-collapse id="nav-collapse" is-nav>
                 <b-navbar-nav class="ml-auto">
-                    <b-nav-item href="admin">Admin</b-nav-item>
+                    <b-nav-item href="admin">
+                        Evaluation <span class="badge badge-info">{{completedPoll}}</span>
+                    </b-nav-item>
                     <b-nav-item href="about">About</b-nav-item>
                 </b-navbar-nav>
             </b-collapse>
         </b-navbar>
+            <b-modal id="help-modal" title="Help">
+                <h6>Normal Poll</h6>
+                <p>You get shown <strong>two</strong> Concepts, which you should rate on a scale from 1 to 10.</p>
+                <ul>
+                    <li>1 means, that both concepts are barely or not related to each other</li>
+                    <li>10 means, that both concepts have a close relationship to each other</li>
+                </ul>
+                <p class="text-info">There is no absolute definition of what <strong>related</strong> means. Follow your intuition!</p>
+                <h6>Spatial Poll</h6>
+                <p>You see several concepts, piled up in the upper left corner of a 2D space. Your task is to organize these concepts in the available space, such that it makes sense to you. The grey lines between the concepts become thicker, the closer you drag the concepts together.</p>
+                <p class="text-info">There is no absolute definition of what <strong>related</strong> means. Follow your intuition!</p>
+            </b-modal>
 
         @routeComponent
 

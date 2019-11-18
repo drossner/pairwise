@@ -11,5 +11,6 @@ class SpatialSession: BaseSession() {
 
     @OneToMany(mappedBy="session", cascade = [CascadeType.ALL])
     val comparisons: MutableList<SpatialComparison> = LinkedList()
+    @Transient var currQst = 0
 
 }

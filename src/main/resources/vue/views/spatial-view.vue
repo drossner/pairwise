@@ -191,7 +191,11 @@
                         clicksPerConcept: this.clicksPerConcept
                     })
                 })
-                    .then(res => location.href = ".");
+                    .then(res => res.json())
+                    .then(json => {
+                        if (json.moreData === false) location.href = '.';
+                        else location.reload();
+                    });
             }
         }
     });

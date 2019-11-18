@@ -1,0 +1,3 @@
+entity-packages: de.iisys.va.pairwise.domain
+transactional-packages: de.iisys.va.pairwise.domain
+querybean-packages: de.iisys.va.pairwise.domain

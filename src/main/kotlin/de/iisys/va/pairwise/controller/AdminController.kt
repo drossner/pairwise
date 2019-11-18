@@ -72,7 +72,17 @@ object AdminController {
         ctx.json(
             SpatialItem(comp.id, comp.konvaResult)
         )
+    }
 
+    fun getCompletedPolls(ctx: Context){
+        val spatCount = QSpatialSession().comparisons.duration.gt(0).findList().map { session ->
+            session.comparisons.all { it.duration > 0 }
+        }.count { it }
+        val compCount = QComparsionSession().comparisons.duration.gt(0).findList().map { session ->
+            session.comparisons.all { it.duration > 0 }
+        }.count { it }
+
+        ctx.json(mapOf("completedPoll" to spatCount+compCount))
     }
 
 }
