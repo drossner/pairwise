@@ -20,7 +20,7 @@ jobs:
       with:
         image: iisysdeva
         tag: latest
-        registry: registry.hub.docker.com
+        registry: docker.io
         username: drossner3
         password: ${{ secrets.DOCKER_PW }}
       
