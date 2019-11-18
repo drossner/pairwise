@@ -3,8 +3,8 @@ import io.ebean.dbmigration.DbMigration
 
 fun main() {
 
-    System.setProperty("ddl.migration.version", "1.1")
-    System.setProperty("ddl.migration.name", "add clicks per concept (spatial)")
+    System.setProperty("ddl.migration.version", "1.2")
+    System.setProperty("ddl.migration.name", "add settings")
 
     val dbmig = DbMigration.create()
     dbmig.setPlatform(Platform.POSTGRES)
