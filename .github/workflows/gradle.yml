@@ -18,9 +18,9 @@ jobs:
     - name: Docker Build & Push
       uses: mr-smithers-excellent/docker-build-push@v1.0
       with:
-        image: iisysdeva
+        image: iisysdeva/pairwise
         tag: latest
-        registry: hub.docker.com
+        registry: docker.io
         username: drossner3
         password: ${{ secrets.DOCKER_PW }}
       
