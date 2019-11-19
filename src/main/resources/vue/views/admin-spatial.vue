@@ -10,7 +10,7 @@
                 selectable select-mode="single" selected-variant="active"
                 :items="items" :fields="fields" :busy="isBusy"
                 :per-page="perPage" :current-page="currentPage"
-                @row-selected="onRowSelected" :tbody-tr-class="rowClass"
+                :tbody-tr-class="rowClass"
         >
             <template v-slot:table-busy>
                 <div class="text-center my-2">
@@ -20,6 +20,14 @@
             </template>
             <template v-slot:empty>
                 <h4 class="text-center">No data available</h4>
+            </template>
+            <template v-slot:cell(id)="row">
+                <b-button block size="sm" @click="row.toggleDetails">{{row.value}}</b-button>
+            </template>
+            <template v-slot:row-details="row">
+                <b-card>
+                   <admin-spatial-sub :sessionid="row.item.id"></admin-spatial-sub>
+                </b-card>
             </template>
         </b-table>
     </div>
@@ -38,7 +46,8 @@
                         {key: "id", sortable: false},
                         {key: "created", sortable: true},
                         {key: "concept_count", sortable: true},
-                        {key: "duration", sortable: true}
+                        {key: "comp_count", sortable: true},
+                        {key: "avg_duration", sortable: true, label: "Average Duration"}
                     ]
                 }
             },
@@ -55,8 +64,9 @@
                                 id: json[i].id,
                                 created: json[i].created,
                                 concept_count: json[i].conceptCount,
-                                duration: (json[i].duration / 1000) + " sec",
-                                finished: json[i].duration > 0
+                                comp_count: json[i].compCount,
+                                avg_duration: (json[i].avgDuration / 1000) + " sec",
+                                finished: json[i].finished
                             });
                         }
                         this.isBusy = false;
@@ -72,10 +82,6 @@
                 }
             },
             methods: {
-                onRowSelected(item) {
-                    if (item === null) return; //pagination
-                    location.href = "admin/spat/" + item[0].id;
-                },
                 rowClass(item, type) {
                     if (!item) return;
                     if (item.finished === false) return 'table-warning'

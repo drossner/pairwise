@@ -64,7 +64,13 @@ fun main() {
         componentwithProps("comparison-review", mapOf("sessionid" to it.pathParam("sessionId"))).handle(it)
     })
     app.get("/admin/spat/:sessionId", Handler {
-        componentwithProps("spatial-review", mapOf("sessionid" to it.pathParam("sessionId"))).handle(it)
+        componentwithProps("spatial-review",
+            mapOf(
+                "sessionid" to it.pathParam("sessionId"),
+                "qstnr" to it.queryParam("qstNr").orEmpty(),
+                "maxnr" to 3.toString() //todo: dynamically loaded in js!
+            )
+        ).handle(it)
     })
 
     app.get("/info/completedpolls", AdminController::getCompletedPolls)
@@ -83,6 +89,7 @@ fun main() {
     app.get("/admin/api/compsession/:sessionId", AdminController::getCompSession)
     app.get("/admin/api/getspatialsessions", AdminController::getSpatialSessions)
     app.get("/admin/api/spatsession/:sessionId", AdminController::getSpatialComp)
+    app.get("/admin/api/spatsession/:sessionId/finishedcomps", AdminController::getSpatFinished)
 
     app.get("/auth/qwertz123", Handler {
         it.sessionAttribute("auth", true)
@@ -96,6 +103,7 @@ fun accessManager(handler: Handler, ctx: Context, permittedRoles: Set<Role>){
     val finishedAll = ctx.sessionAttribute<Boolean>("finished")?:false
         && (ctx.sessionAttribute<Boolean>("finishedSpat"))?:false
     when {
+        ctx.host()?.contains("localhost", true)?: false -> handler.handle(ctx)
         ctx.matchedPath().startsWith("/admin", true).not() -> handler.handle(ctx)
         finishedAll -> handler.handle(ctx)
         ctx.sessionAttribute<Boolean>("auth")?:false -> handler.handle(ctx)

@@ -1,16 +1,19 @@
 package de.iisys.va.pairwise.controller
 
 import de.iisys.va.pairwise.domain.pair.query.QComparsionSession
+import de.iisys.va.pairwise.domain.spatial.SpatialComparison
 import de.iisys.va.pairwise.domain.spatial.SpatialSession
 import de.iisys.va.pairwise.domain.spatial.query.QSpatialComparison
 import de.iisys.va.pairwise.domain.spatial.query.QSpatialSession
 import de.iisys.va.pairwise.json.*
 import io.ebean.DB
 import io.ebean.FetchConfig
+import io.javalin.http.BadRequestResponse
 import io.javalin.http.Context
 import io.javalin.http.NotFoundResponse
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.collections.HashMap
 
 object AdminController {
 
@@ -52,7 +55,9 @@ object AdminController {
             sessions.map {
                 SpatialOverviewItem(
                     it.sessionId.toString(), formattedDate.format(it.created!!),
-                    it.comparisons.first().concepts.size, it.comparisons.first().duration
+                    it.comparisons.first().concepts.size, it.comparisons.size,
+                    it.comparisons.map { comp -> comp.duration }.average(),
+                    it.comparisons.any { comp -> comp.duration == 0L }.not()
                 )
             }
         )
@@ -68,10 +73,33 @@ object AdminController {
         val session = QSpatialSession()
             .sessionId.equalTo(UUID.fromString(ctx.pathParam("sessionId")))
             .findOne()?: throw NotFoundResponse()
-        val comp = session.comparisons.first()
+        val qstNr = ctx.queryParam<Int>("qstNr").get()
+
+        val comp = if((qstNr in session.comparisons.indices))
+            session.comparisons[qstNr]
+        else throw BadRequestResponse()
         ctx.json(
-            SpatialItem(comp.id, comp.konvaResult)
+            SpatialItem(comp.id,
+                comp.konvaResult,
+                comp.duration,
+                comp.clicksPerConcept.toIntArray())
         )
+    }
+
+    fun getSpatFinished(ctx: Context){
+        val session = QSpatialSession()
+            .sessionId.equalTo(UUID.fromString(ctx.pathParam("sessionId")))
+            .findOne()?: throw NotFoundResponse()
+        val tmp = TreeMap<Int, SpatialComparison>()
+        session.comparisons.forEachIndexed { i, comp ->
+            if(comp.duration > 0) tmp.put(i, comp)
+        }
+        val res = LinkedList<SpatialSubOverviewItem>()
+
+        tmp.entries.forEach { pair ->
+            res.add(SpatialSubOverviewItem(pair.key, pair.value.scale, pair.value.duration))
+        }
+        ctx.json(res)
     }
 
     fun getCompletedPolls(ctx: Context){
