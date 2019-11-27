@@ -1,38 +1,51 @@
 import de.iisys.va.pairwise.domain.pair.ComparsionSession
 import de.iisys.va.pairwise.domain.pair.query.QComparsionSession
+import kotlin.time.seconds
 
 fun main() {
     val sessions = QComparsionSession().findList()
-    println()
+    /*println()
     println(allAverageTime(sessions))
     println("--------------------------------------------------------------------")
-    println(averageSessionTime(sessions))
+    averageSessionTime(sessions).forEach { println("Durchschnittliche Dauer der Session ${it.first}: ${it.second} ms") }
+     */
+
+    val conceptsA = filterNoZero(sessions).flatMap { it.comparisons.map { it.conceptA?.name } }
+    val conceptsB = filterNoZero(sessions).flatMap { it.comparisons.map { it.conceptB?.name } }
+    val conceptPairs = conceptsA.zip(conceptsB)
+    println(conceptPairs[0])
 
 
-    /*
-    val conceptsA = sessions.map { it.comparisons.map { it1 -> it1.conceptA?.name } }
-    val conceptsB = sessions.map { it.comparisons.map { it1 -> it1.conceptB?.name } }
-    val namePair = conceptsB[0].zip(conceptsA[0])
-    println(sessions.first().comparisons.first().conceptA?.name)
-    println(conceptsB[0].zip(conceptsA[0]))
-    println(namePair[0]==namePair[0])
-    */
+    //todo fixen
+    for (i in 1 until conceptPairs.size)
+        for (j in 0 until conceptPairs.size-i)
+            if (conceptPairs[j] == conceptPairs[j+1]) {
+                println(conceptPairs[j])
+            }
+
 }
 
+fun filterNoZero(sessions: MutableList<ComparsionSession>): List<ComparsionSession> {
+    //sessions.filter { it.comparisons.all { it.duration > 0 } }
+    return sessions.filter { !it.comparisons.any { comp -> comp.duration <= 0 } }
+}
 
 /**
  * averageSessionTime ermittelt die durchschnittliche Zeit pro Session
  * Beachtete werden nur Sessions, die keine 0 in der Dauer der Comparison haben
  */
-fun averageSessionTime(sessions: MutableList<ComparsionSession>) {
+fun averageSessionTime(sessions: MutableList<ComparsionSession>): List<Pair<String, Double>> {
 
+    val averageSessionDuration = filterNoZero(sessions).map {
+        it.comparisons.map {
+                it1 -> it1.duration
+        }.average()
+    }
+    val sessionID = filterNoZero(sessions).map {
+        it.sessionId.toString()
+    }
 
-    val averageSessionDuration = sessions.filter { !it.comparisons.any { comp -> comp.duration <= 0 } }.map { it.comparisons.map { it.duration }.average() }
-    val sessionID = sessions.filter { !it.comparisons.any { comp -> comp.duration <= 0 } }.map { it.sessionId.toString() }
-    val sessionDuration = sessionID zip averageSessionDuration
-
-    sessionDuration.forEach { println("Durchschnittliche Dauer für Session: $it") }
-
+    return sessionID.zip(averageSessionDuration)
 }
 
 
@@ -43,7 +56,7 @@ fun averageSessionTime(sessions: MutableList<ComparsionSession>) {
  *
  */
 fun allAverageTime(sessions: MutableList<ComparsionSession>): String {
-    val allDurations = sessions.map { it.comparisons.map { it1 -> it1.duration } }.flatten().mapNotNull { if (it == 0L) null else it }
+    val allDurations = sessions.map { it.comparisons.map { it.duration } }.flatten().filter { it > 0 }
 
     var sum = 0L
     allDurations.map { sum += it }
