@@ -1,44 +1,54 @@
 import de.iisys.va.pairwise.domain.pair.ComparsionSession
 import de.iisys.va.pairwise.domain.pair.query.QComparsionSession
-import kotlin.time.seconds
 
 fun main() {
     val sessions = QComparsionSession().findList()
-    /*println()
-    println(allAverageTime(sessions))
+    println("Gesamtanzahl der Zeiten: ${allDurationsCount(sessions)}\n" +
+            "Dauer insgesamt: ${sum(sessions)} ms\n" +
+            "Durchschnittliche Dauer: ${allAverageTime(sessions)} ms")
     println("--------------------------------------------------------------------")
+
     averageSessionTime(sessions).forEach { println("Durchschnittliche Dauer der Session ${it.first}: ${it.second} ms") }
-     */
+    println("--------------------------------------------------------------------")
 
     val conceptsA = filterNoZero(sessions).flatMap { it.comparisons.map { it.conceptA?.name } }
     val conceptsB = filterNoZero(sessions).flatMap { it.comparisons.map { it.conceptB?.name } }
     val conceptPairs = conceptsA.zip(conceptsB)
-    println(conceptPairs[0])
+    val ratings = filterNoZero(sessions).flatMap { it.comparisons.map { it.rating } }
 
 
-    //todo fixen
-    for (i in 1 until conceptPairs.size)
-        for (j in 0 until conceptPairs.size-i)
-            if (conceptPairs[j] == conceptPairs[j+1]) {
-                println(conceptPairs[j])
+    for (i in conceptPairs.indices) {
+        for (j in 1 + i until conceptPairs.size - i) {
+            if (conceptPairs[i] == conceptPairs[j]) {
+                println(conceptPairs[i])
+                println("${ratings[j]}, ${ratings[i]}")
+                println("------------------------")
             }
-
+        }
+    }
 }
 
+/**
+ * This function filters all sessions that are completed.
+ *
+ * @param sessions list with all sessions
+ * @return List<ComparisionSession> list with completed sessions
+ */
 fun filterNoZero(sessions: MutableList<ComparsionSession>): List<ComparsionSession> {
-    //sessions.filter { it.comparisons.all { it.duration > 0 } }
     return sessions.filter { !it.comparisons.any { comp -> comp.duration <= 0 } }
 }
 
 /**
- * averageSessionTime ermittelt die durchschnittliche Zeit pro Session
- * Beachtete werden nur Sessions, die keine 0 in der Dauer der Comparison haben
+ * This function picks the average time for a whole session in ms and the associated session-ID
+ *
+ * @param sessions list with all sessions
+ * @return List<Pair<String, Double>> list with Pair(session-ID, average time)
  */
 fun averageSessionTime(sessions: MutableList<ComparsionSession>): List<Pair<String, Double>> {
 
     val averageSessionDuration = filterNoZero(sessions).map {
-        it.comparisons.map {
-                it1 -> it1.duration
+        it.comparisons.map { it1 ->
+            it1.duration
         }.average()
     }
     val sessionID = filterNoZero(sessions).map {
@@ -50,18 +60,41 @@ fun averageSessionTime(sessions: MutableList<ComparsionSession>): List<Pair<Stri
 
 
 /**
- * allAverageTime ermittelt die Gesamtanzahl an absolvierten vergleichen (nicht Sessions),
- * wie Lange die Vergleiche insgesamt gedauert haben und noch die durchschnittliche Dauer
- * der Vergleiche
+ * This functions calculates the average time of all sessions with the durations bigger than 0
  *
+ * @param sessions list with all sessions
+ * @return Double average time
  */
-fun allAverageTime(sessions: MutableList<ComparsionSession>): String {
-    val allDurations = sessions.map { it.comparisons.map { it.duration } }.flatten().filter { it > 0 }
+fun allAverageTime(sessions: MutableList<ComparsionSession>): Double {
+    return sum(sessions)/allDurationsCount(sessions).toDouble()
+}
 
+/**
+ * This function maps all comparisons to a flatten List with durations bigger than 0
+ *
+ * @param sessions list with all sessions
+ * @return List<Long> list with all durations bigger than 0
+ */
+fun allDurations(sessions: MutableList<ComparsionSession>): List<Long> {
+    return sessions.flatMap { it.comparisons.map { it.duration } }.filter { it > 0 }
+}
+
+/**
+ * This function calculates the sum of all durations
+ *
+ * @param sessions list with all sessions
+ * @return Long sum of all durations
+ */
+fun sum(sessions: MutableList<ComparsionSession>): Long{
     var sum = 0L
-    allDurations.map { sum += it }
+    allDurations(sessions).map { sum+= it }
+    return sum
+}
 
-    return ("Gesamtanzahl der Zeiten: ${allDurations.size}\n" +
-            "Dauer insgesamt: $sum ms\n" +
-            "Durchschnitt der Dauer aller Sessions: ${sum / allDurations.size} ms")
+/**
+ * @param sessions list with all sessions
+ * @return int list size of all durations
+ */
+fun allDurationsCount(sessions: MutableList<ComparsionSession>): Int {
+    return allDurations(sessions).size
 }
