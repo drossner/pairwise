@@ -1,5 +1,11 @@
 import de.iisys.va.pairwise.domain.pair.ComparsionSession
 import de.iisys.va.pairwise.domain.pair.query.QComparsionSession
+import java.io.FileWriter
+import java.io.IOException
+import java.lang.Exception
+
+
+private var CSV_HEADER = "Session,Avg Duration,Avg Rating"
 
 fun main() {
     val sessions = QComparsionSession().findList()
@@ -10,10 +16,41 @@ fun main() {
     )
     println("--------------------------------------------------------------------")
 
-    averageSessionTime(sessions).forEach { println("Durchschnittliche Dauer der Session ${it.first}: ${it.second} ms") }
+    averageSession(sessions).forEach { println("Durchschnittliche Dauer und Rating der Session ${it.first.first}: ${it.first.second} ms, ${it.second}") }
     println("--------------------------------------------------------------------")
 
     println(doubleComparisons(sessions))
+
+
+
+    //Create/Write CSV-File
+    var fileWriter: FileWriter? = null
+    try {
+        fileWriter = FileWriter("completedSessions.csv")
+        fileWriter.append(CSV_HEADER)
+        fileWriter.append("\n")
+
+        for (session in averageSession(sessions)){
+            fileWriter.append(session.first.first)
+            fileWriter.append(",")
+            fileWriter.append(session.first.second.toString())
+            fileWriter.append(",")
+            fileWriter.append(session.second.toString())
+            fileWriter.append("\n")
+        }
+        println("Finished writing!")
+    }catch (e: Exception){
+        println("Writing CSV error!")
+        e.printStackTrace()
+    }finally {
+        try {
+            fileWriter!!.flush()
+            fileWriter.close()
+        }catch (e: IOException){
+            println("Flushing/Closing error!")
+            e.printStackTrace()
+        }
+    }
 }
 
 
@@ -53,7 +90,7 @@ fun filterNoZero(sessions: MutableList<ComparsionSession>): List<ComparsionSessi
  * @param sessions list with all sessions
  * @return List<Pair<String, Double>> list with Pair(session-ID, average time)
  */
-fun averageSessionTime(sessions: MutableList<ComparsionSession>): List<Pair<String, Double>> {
+fun averageSession(sessions: MutableList<ComparsionSession>): List<Pair<Pair<String, Double>, Double>> {
 
     val averageSessionDuration = filterNoZero(sessions).map {
         it.comparisons.map { it1 ->
@@ -64,7 +101,10 @@ fun averageSessionTime(sessions: MutableList<ComparsionSession>): List<Pair<Stri
         it.sessionId.toString()
     }
 
-    return sessionID.zip(averageSessionDuration)
+    val averageSessionRating = filterNoZero(sessions).map {
+        it.comparisons.map { it1 -> it1.rating }.average()
+    }
+    return sessionID zip averageSessionDuration zip averageSessionRating
 }
 
 
