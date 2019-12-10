@@ -8,8 +8,10 @@ import java.lang.Exception
 private var COMPLETED_SESSION_HEADER = "Session,Avg Duration,Avg Rating"
 private var SINGLE_SESSION_HEADER = "SessionID,ConceptA,Rating,Duration,ConceptB"
 
+
+private val sessions: MutableList<ComparsionSession> = QComparsionSession().findList()
+
 fun main() {
-    val sessions = QComparsionSession().findList()
     println(
         "Gesamtanzahl der Zeiten: ${allDurationsCount(sessions)}\n" +
                 "Dauer insgesamt: ${sum(sessions)} ms\n" +
@@ -24,13 +26,13 @@ fun main() {
 
 
     var fileWriter: FileWriter? = null
+
     //create/Write CVS-File for single sessions
-    val completedSessions = sessions.flatMap { it.comparisons.map { it } }.filter { it.duration > 0 }
+    val completedSessions = filterNoZero(sessions).map { it.comparisons.map { it } }.flatten()
     try {
         fileWriter = FileWriter("singleSessions.csv")
         fileWriter.append(SINGLE_SESSION_HEADER)
         fileWriter.append("\n")
-
         for (session in completedSessions) {
             fileWriter.append(session.session?.sessionId.toString())
             fileWriter.append(",")
@@ -43,7 +45,6 @@ fun main() {
             fileWriter.append(session.conceptB?.name)
             fileWriter.append("\n")
         }
-
         println("Finished writing!")
     } catch (e: Exception) {
         println("Writing CSV error!")
@@ -58,16 +59,11 @@ fun main() {
         }
     }
 
-
-
-
-
     //Create/Write completedSession CSV-File
     try {
         fileWriter = FileWriter("completedSessions.csv")
         fileWriter.append(COMPLETED_SESSION_HEADER)
         fileWriter.append("\n")
-
         for (session in averageSession(sessions)) {
             fileWriter.append(session.first.first)
             fileWriter.append(",")
@@ -91,12 +87,11 @@ fun main() {
     }
 }
 
-
 fun doubleComparisons(sessions: MutableList<ComparsionSession>): MutableList<Pair<String?, String?>> {
     val conceptsA = filterNoZero(sessions).flatMap { it.comparisons.map { it.conceptA?.name } }
     val conceptsB = filterNoZero(sessions).flatMap { it.comparisons.map { it.conceptB?.name } }
     val conceptPairs = conceptsA.zip(conceptsB)
-    val ratings = filterNoZero(sessions).flatMap { it.comparisons.map { it.rating } }
+    //val ratings = filterNoZero(sessions).flatMap { it.comparisons.map { it.rating } }
     val doublePairs: MutableList<Pair<String?, String?>> = arrayListOf()
 
     for (i in conceptPairs.indices) {
@@ -106,8 +101,6 @@ fun doubleComparisons(sessions: MutableList<ComparsionSession>): MutableList<Pai
             }
         }
     }
-
-    //println(conceptPairs.sortedBy { it.first })
     return doublePairs
 }
 
