@@ -6,6 +6,7 @@ import java.lang.Exception
 
 
 private var COMPLETED_SESSION_HEADER = "Session,Avg Duration,Avg Rating"
+private var SINGLE_SESSION_HEADER = "SessionID,ConceptA,Rating,Duration,ConceptB"
 
 fun main() {
     val sessions = QComparsionSession().findList()
@@ -22,8 +23,46 @@ fun main() {
     println(doubleComparisons(sessions))
 
 
-    //Create/Write CSV-File
     var fileWriter: FileWriter? = null
+    //create/Write CVS-File for single sessions
+    val completedSessions = sessions.flatMap { it.comparisons.map { it } }.filter { it.duration > 0 }
+    try {
+        fileWriter = FileWriter("singleSessions.csv")
+        fileWriter.append(SINGLE_SESSION_HEADER)
+        fileWriter.append("\n")
+
+        for (session in completedSessions) {
+            fileWriter.append(session.session?.sessionId.toString())
+            fileWriter.append(",")
+            fileWriter.append(session.conceptA?.name)
+            fileWriter.append(",")
+            fileWriter.append(session.rating.toString())
+            fileWriter.append(",")
+            fileWriter.append(session.duration.toString())
+            fileWriter.append(",")
+            fileWriter.append(session.conceptB?.name)
+            fileWriter.append("\n")
+        }
+
+        println("Finished writing!")
+    } catch (e: Exception) {
+        println("Writing CSV error!")
+        println(e.printStackTrace())
+    } finally {
+        try {
+            fileWriter!!.flush()
+            fileWriter.close()
+        } catch (e: IOException) {
+            println("Flushing/Closing error!")
+            e.printStackTrace()
+        }
+    }
+
+
+
+
+
+    //Create/Write completedSession CSV-File
     try {
         fileWriter = FileWriter("completedSessions.csv")
         fileWriter.append(COMPLETED_SESSION_HEADER)
