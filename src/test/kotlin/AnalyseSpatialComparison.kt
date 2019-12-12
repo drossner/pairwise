@@ -2,8 +2,7 @@ import de.iisys.va.pairwise.domain.spatial.query.QSpatialSession
 
 fun main() {
     val sessions = QSpatialSession().findList()
+    val completedSessions = sessions.filter { !it.comparisons.any { it.duration <= 0 } }
 
-    println(sessions.size)
-    //sessions.map { it.comparisons.forEach{ println("x: ${it.dimX}, y: ${it.dimY}") } }
-    println(sessions.flatMap { it.comparisons.map { it.session.sessionId }})
+    println(completedSessions.map { it.comparisons.map { it.positions.map { it.x } } })
 }
