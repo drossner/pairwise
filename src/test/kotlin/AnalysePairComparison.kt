@@ -30,7 +30,7 @@ fun main() {
     //create/Write CVS-File for single sessions
     val completedSessions = filterNoZero(sessions).map { it.comparisons.map { it } }.flatten()
     try {
-        fileWriter = FileWriter("singleSessions.csv")
+        fileWriter = FileWriter("./R/src/singleSessions.csv")
         fileWriter.append(SINGLE_SESSION_HEADER)
         fileWriter.append("\n")
         for (session in completedSessions) {
@@ -61,7 +61,7 @@ fun main() {
 
     //Create/Write completedSession CSV-File
     try {
-        fileWriter = FileWriter("completedSessions.csv")
+        fileWriter = FileWriter("./R/src/completedSessions.csv")
         fileWriter.append(COMPLETED_SESSION_HEADER)
         fileWriter.append("\n")
         for (session in averageSession(sessions)) {
