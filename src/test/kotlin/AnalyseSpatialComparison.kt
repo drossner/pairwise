@@ -1,7 +1,12 @@
 import de.iisys.va.pairwise.domain.spatial.SpatialSession
 import de.iisys.va.pairwise.domain.spatial.query.QSpatialSession
+import java.io.FileWriter
+import java.io.IOException
+import java.lang.Exception
 import kotlin.math.pow
 import kotlin.math.sqrt
+
+private var SPATIAL_HEADER = "SessionID,ConceptA,ConceptB,Distance,avg_Distance"
 
 fun main() {
     val sessions = QSpatialSession().findList()
@@ -22,20 +27,15 @@ fun main() {
     val sortedSpatialDistances = spatialDistances.sortedBy { it.second[1] }.sortedBy { it.second[0] }
     sortedSpatialDistances.map { println(it) }
     println("------------------------------")
+
+    //only pairs with occurrence bigger than 2
     val groupedSpatialDistances = sortedSpatialDistances.groupingBy { it.second }.eachCount().filter { it.value > 2 }
     groupedSpatialDistances.map { println(it) }
     println("------------------------------")
 
-    //sort by the pairs, groups them und count the occurrences
-    /*val comparisonPairs = spatialDistances.map { it.second.sorted() }.sortedBy { it[1] }.sortedBy { it[0] }
-    comparisonPairs.map { println(it) }
-    val groupedComparisonPairs = comparisonPairs.groupingBy { it }.eachCount().filter { it.value > 2 }
-    groupedComparisonPairs.map { println(it) }
-    println("------------------------------")*/
 
-
-    //groupedSpatialDistances.map { println(it.key) }
     var a = 0.0
+    val list: MutableList<Triple<String, MutableList<String>, MutableList<Double>>> = arrayListOf()
     for (element in groupedSpatialDistances) {
         for (triple in sortedSpatialDistances) {
             if (element.key == triple.second) {
@@ -45,11 +45,46 @@ fun main() {
         for (triple in sortedSpatialDistances) {
             if (element.key == triple.second){
                 triple.third.add(a/element.value)
+                list.add(triple)
             }
         }
         a = 0.0
     }
-    sortedSpatialDistances.map { println(it) }
+    list.map { println(it) }
+
+
+    var fileWriter: FileWriter? = null
+    try {
+        fileWriter = FileWriter("./R/src/Spatial_Data.csv")
+        fileWriter.append(SPATIAL_HEADER)
+        fileWriter.append("\n")
+        list.map {
+            fileWriter.append(it.first)
+            fileWriter.append(",")
+            fileWriter.append(it.second[0])
+            fileWriter.append(",")
+            fileWriter.append(it.second[1])
+            fileWriter.append(",")
+            fileWriter.append(it.third[it.third.size-2].toString())
+            fileWriter.append(",")
+            fileWriter.append(it.third[it.third.size-1].toString())
+            fileWriter.append("\n")
+        }
+        println("Finished writing!")
+    }catch (e: Exception) {
+        println("Writing CSV error!")
+        println(e.printStackTrace())
+    }finally {
+        try {
+            fileWriter!!.flush()
+            fileWriter.close()
+        }catch (e: IOException){
+            println("Flushing/Closing error!")
+            println(e.printStackTrace())
+        }
+    }
+
+
 }
 
 
