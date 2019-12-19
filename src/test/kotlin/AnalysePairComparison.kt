@@ -22,14 +22,6 @@ fun main() {
     averageSession(sessions).forEach { println("Durchschnittliche Dauer und Rating der Session ${it.first.first}: ${it.first.second} ms, ${it.second}") }
     println("--------------------------------------------------------------------")
 
-    //println(doubleComparisons(sessions))
-    val conceptsA = filterNoZero(sessions).flatMap { it.comparisons.map { it.conceptA?.name } }
-    val conceptsB = filterNoZero(sessions).flatMap { it.comparisons.map { it.conceptB?.name } }
-    val conceptPairs = conceptsA.zip(conceptsB)
-    val sortedConceptPairs = conceptPairs.map { it.toList() }.sortedBy { it[1] }
-    val groupedConceptPairs = conceptPairs.groupingBy { it }.eachCount().filter { it.value > 2 }
-
-
     var fileWriter: FileWriter? = null
 
     //create/Write CVS-File for single sessions
