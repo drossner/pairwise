@@ -1,7 +1,5 @@
 import de.iisys.va.pairwise.domain.spatial.SpatialSession
 import de.iisys.va.pairwise.domain.spatial.query.QSpatialSession
-import java.util.*
-import java.util.Collections.sort
 import kotlin.math.pow
 import kotlin.math.sqrt
 
@@ -20,12 +18,12 @@ fun main() {
     val spatialDistances = spatialDistance(completedSessions, positions)
 
     println("------------------------------")
-
-    val sortedSpatialDistance = spatialDistances.sortedBy { it.second[1] }.sortedBy { it.second[0] }
-    sortedSpatialDistance.map { println(it) }
+    spatialDistances.forEach { it.second.sort() }
+    val sortedSpatialDistances = spatialDistances.sortedBy { it.second[1] }.sortedBy { it.second[0] }
+    sortedSpatialDistances.map { println(it) }
     println("------------------------------")
-    val groupedSpatialDistance = sortedSpatialDistance.groupingBy { it.second }.eachCount().filter { it.value > 2 }
-    groupedSpatialDistance.map { println(it) }
+    val groupedSpatialDistances = sortedSpatialDistances.groupingBy { it.second }.eachCount().filter { it.value > 2 }
+    groupedSpatialDistances.map { println(it) }
     println("------------------------------")
 
     //sort by the pairs, groups them und count the occurrences
@@ -35,12 +33,23 @@ fun main() {
     groupedComparisonPairs.map { println(it) }
     println("------------------------------")*/
 
-    for (i in sortedSpatialDistance.indices) {
-        sortedSpatialDistance.iterator()
+
+    //groupedSpatialDistances.map { println(it.key) }
+    var a = 0.0
+    for (element in groupedSpatialDistances) {
+        for (triple in sortedSpatialDistances) {
+            if (element.key == triple.second) {
+                a += triple.third.last()
+            }
+        }
+        for (triple in sortedSpatialDistances) {
+            if (element.key == triple.second){
+                triple.third.add(a/element.value)
+            }
+        }
+        a = 0.0
     }
-
-
-
+    sortedSpatialDistances.map { println(it) }
 }
 
 
@@ -53,8 +62,8 @@ fun main() {
  * @return List with the session ID, the pairs, the Positions of the pairs and their distance
  */
 fun spatialDistance(completedSessions: List<SpatialSession>, positions: List<List<List<Pair<Double, Double>>>>):
-        MutableList<Triple<String, List<String>, List<Double>>> {
-    val positionLengths: MutableList<Triple<String, List<String>, List<Double>>> = arrayListOf()
+        MutableList<Triple<String, MutableList<String>, MutableList<Double>>> {
+    val positionLengths: MutableList<Triple<String, MutableList<String>, MutableList<Double>>> = arrayListOf()
     for (i in positions.indices) {
         for (j in positions[i].indices) {
             for (k in positions[i][j].indices) {
@@ -62,11 +71,11 @@ fun spatialDistance(completedSessions: List<SpatialSession>, positions: List<Lis
                     positionLengths.add(
                         Triple(
                             completedSessions[i].sessionId.toString(),
-                            listOf(
+                            mutableListOf(
                                 completedSessions[i].comparisons[j].concepts[k].name.toString(),
                                 completedSessions[i].comparisons[j].concepts[l].name.toString()
                             ),
-                            listOf(
+                            mutableListOf(
                                 positions[i][j][k].first,
                                 positions[i][j][k].second,
                                 positions[i][j][l].first,
