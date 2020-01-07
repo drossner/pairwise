@@ -22,48 +22,20 @@ fun main() {
 
     val spatialDistances = spatialDistance(completedSessions, positions)
 
-    println("------------------------------")
     spatialDistances.forEach { it.second.sort() }
     val sortedSpatialDistances = spatialDistances.sortedBy { it.second[1] }.sortedBy { it.second[0] }
     //sortedSpatialDistances.map { println(it) }
-    println("------------------------------")
 
     //only pairs with occurrence bigger than 2
     val groupedSpatialDistances = sortedSpatialDistances.groupingBy { it.second }.eachCount().filter { it.value > 2 }
     //groupedSpatialDistances.map { println(it) }
-    println("------------------------------")
 
-    /*
-     * 1. wenn der key der map mit der mutable list des tripels übereinstimmt, dann addiere die Distanz auf
-     * 2. wenn der key der map mit der mutable list des tripels übereinstimmt, dann bilde den Durchschnitt für diese Paare
-     */
-    var sum = 0.0
-    var max = 0.0
-    val list: MutableList<Triple<String, MutableList<String>, MutableList<Double>>> = arrayListOf()
-    for (element in groupedSpatialDistances) {
-        for (triple in sortedSpatialDistances) {
-            if (element.key == triple.second) {
-                sum += triple.third.first()
 
-                if (max < triple.third.first()) {
-                    max = triple.third.first()
-                }
-            }
-        }
-        for (triple in sortedSpatialDistances) {
-            if (element.key == triple.second) {
-                triple.third.add(sum / element.value)
-
-                triple.third.add(triple.third.first() / max)
-
-                list.add(triple)
-            }
-        }
-        max = 0.0
-        sum = 0.0
-    }
+    val list = spatialPercentage(groupedSpatialDistances, sortedSpatialDistances)
     list.map { println(it) }
 
+
+    //export Data as CSV-File
     var fileWriter: FileWriter? = null
     try {
         fileWriter = FileWriter("./R/src/Spatial_Data.csv")
@@ -96,8 +68,47 @@ fun main() {
             println(e.printStackTrace())
         }
     }
+}
 
+/**
+ * this function calculates the percentage depending on the maximum of the pairs and also calculates the
+ * average distance of each pair
+ *
+ * @param groupedSpatialDistances map with the pairs as key and the amount of pairs as value to build the average
+ * @param sortedSpatialDistances list of sorted pairs with their distances
+ *
+ * @return list with session-ID, pair, distance, average distance and the percentage
+ */
+fun spatialPercentage(
+    groupedSpatialDistances: Map<MutableList<String>, Int>,
+    sortedSpatialDistances: List<Triple<String, MutableList<String>, MutableList<Double>>>
+): MutableList<Triple<String, MutableList<String>, MutableList<Double>>> {
+    val list: MutableList<Triple<String, MutableList<String>, MutableList<Double>>> = arrayListOf()
+    var sum = 0.0
+    var max = 0.0
+    for (element in groupedSpatialDistances) {
+        for (triple in sortedSpatialDistances) {
+            if (element.key == triple.second) {
+                sum += triple.third.first()
 
+                if (max < triple.third.first()) {
+                    max = triple.third.first()
+                }
+            }
+        }
+        for (triple in sortedSpatialDistances) {
+            if (element.key == triple.second) {
+                triple.third.add(sum / element.value)
+
+                triple.third.add(triple.third.first() / max)
+
+                list.add(triple)
+            }
+        }
+        max = 0.0
+        sum = 0.0
+    }
+    return list
 }
 
 
@@ -139,3 +150,4 @@ fun spatialDistance(completedSessions: List<SpatialSession>, positions: List<Lis
 
     return positionLengths
 }
+
