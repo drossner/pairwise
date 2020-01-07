@@ -6,7 +6,7 @@ import java.lang.Exception
 import kotlin.math.pow
 import kotlin.math.sqrt
 
-private var SPATIAL_HEADER = "SessionID,ConceptA,ConceptB,Distance,avg_Distance"
+private var SPATIAL_HEADER = "SessionID,ConceptA,ConceptB,Distance,avg_Distance,Percentage"
 
 fun main() {
     val sessions = QSpatialSession().findList()
@@ -25,33 +25,44 @@ fun main() {
     println("------------------------------")
     spatialDistances.forEach { it.second.sort() }
     val sortedSpatialDistances = spatialDistances.sortedBy { it.second[1] }.sortedBy { it.second[0] }
-    sortedSpatialDistances.map { println(it) }
+    //sortedSpatialDistances.map { println(it) }
     println("------------------------------")
 
     //only pairs with occurrence bigger than 2
     val groupedSpatialDistances = sortedSpatialDistances.groupingBy { it.second }.eachCount().filter { it.value > 2 }
-    groupedSpatialDistances.map { println(it) }
+    //groupedSpatialDistances.map { println(it) }
     println("------------------------------")
 
-
-    var a = 0.0
+    /*
+     * 1. wenn der key der map mit der mutable list des tripels übereinstimmt, dann addiere die Distanz auf
+     * 2. wenn der key der map mit der mutable list des tripels übereinstimmt, dann bilde den Durchschnitt für diese Paare
+     */
+    var sum = 0.0
+    var max = 0.0
     val list: MutableList<Triple<String, MutableList<String>, MutableList<Double>>> = arrayListOf()
     for (element in groupedSpatialDistances) {
         for (triple in sortedSpatialDistances) {
             if (element.key == triple.second) {
-                a += triple.third.last()
+                sum += triple.third.first()
+
+                if (max < triple.third.first()) {
+                    max = triple.third.first()
+                }
             }
         }
         for (triple in sortedSpatialDistances) {
-            if (element.key == triple.second){
-                triple.third.add(a/element.value)
+            if (element.key == triple.second) {
+                triple.third.add(sum / element.value)
+
+                triple.third.add(triple.third.first() / max)
+
                 list.add(triple)
             }
         }
-        a = 0.0
+        max = 0.0
+        sum = 0.0
     }
     list.map { println(it) }
-
 
     var fileWriter: FileWriter? = null
     try {
@@ -65,20 +76,22 @@ fun main() {
             fileWriter.append(",")
             fileWriter.append(it.second[1])
             fileWriter.append(",")
-            fileWriter.append(it.third[it.third.size-2].toString())
+            fileWriter.append(it.third[0].toString())
             fileWriter.append(",")
-            fileWriter.append(it.third[it.third.size-1].toString())
+            fileWriter.append(it.third[1].toString())
+            fileWriter.append(",")
+            fileWriter.append(it.third[2].toString())
             fileWriter.append("\n")
         }
         println("Finished writing!")
-    }catch (e: Exception) {
+    } catch (e: Exception) {
         println("Writing CSV error!")
         println(e.printStackTrace())
-    }finally {
+    } finally {
         try {
             fileWriter!!.flush()
             fileWriter.close()
-        }catch (e: IOException){
+        } catch (e: IOException) {
             println("Flushing/Closing error!")
             println(e.printStackTrace())
         }
@@ -111,11 +124,14 @@ fun spatialDistance(completedSessions: List<SpatialSession>, positions: List<Lis
                                 completedSessions[i].comparisons[j].concepts[l].name.toString()
                             ),
                             mutableListOf(
-                                positions[i][j][k].first,
-                                positions[i][j][k].second,
-                                positions[i][j][l].first,
-                                positions[i][j][l].second,
-                                sqrt((positions[i][j][k].first - positions[i][j][l].first).pow(2.0) + (positions[i][j][k].second - positions[i][j][l].second).pow(2.0)))))
+                                sqrt(
+                                    (positions[i][j][k].first - positions[i][j][l].first).pow(2.0) + (positions[i][j][k].second - positions[i][j][l].second).pow(
+                                        2.0
+                                    )
+                                )
+                            )
+                        )
+                    )
                 }
             }
         }
