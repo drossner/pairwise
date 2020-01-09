@@ -6,7 +6,7 @@ import java.lang.Exception
 import kotlin.math.pow
 import kotlin.math.sqrt
 
-private var SPATIAL_HEADER = "SessionID,ConceptA,ConceptB,Distance,avg_Distance,Percentage"
+private var SPATIAL_HEADER = "SessionID,ConceptA,ConceptB,Distance,Percentage"
 
 fun main() {
     val sessions = QSpatialSession().findList()
@@ -22,18 +22,14 @@ fun main() {
 
     val spatialDistances = spatialDistance(completedSessions, positions)
 
-    spatialDistances.forEach { it.second.sort() }
-    val sortedSpatialDistances = spatialDistances.sortedBy { it.second[1] }.sortedBy { it.second[0] }
-    //sortedSpatialDistances.map { println(it) }
+    //spatialDistances.forEach { it.second.sort() }
+    //val sortedSpatialDistances = spatialDistances//.sortedBy { it.second[1] }.sortedBy { it.second[0] }
 
     //only pairs with occurrence bigger than 2
-    val groupedSpatialDistances = sortedSpatialDistances.groupingBy { it.second }.eachCount().filter { it.value > 2 }
-    //groupedSpatialDistances.map { println(it) }
+    //val groupedSpatialDistances = sortedSpatialDistances.groupingBy { it.second }.eachCount().filter { it.value > 2 }
 
-
-    val list = spatialPercentage(groupedSpatialDistances, sortedSpatialDistances)
+    val list = spatialPercentage(spatialDistances)
     list.map { println(it) }
-
 
     //export Data as CSV-File
     var fileWriter: FileWriter? = null
@@ -51,8 +47,6 @@ fun main() {
             fileWriter.append(it.third[0].toString())
             fileWriter.append(",")
             fileWriter.append(it.third[1].toString())
-            fileWriter.append(",")
-            fileWriter.append(it.third[2].toString())
             fileWriter.append("\n")
         }
         println("Finished writing!")
@@ -70,45 +64,34 @@ fun main() {
     }
 }
 
+
 /**
  * this function calculates the percentage depending on the maximum of the pairs and also calculates the
  * average distance of each pair
  *
- * @param groupedSpatialDistances map with the pairs as key and the amount of pairs as value to build the average
- * @param sortedSpatialDistances list of sorted pairs with their distances
+ * @param spatialDistances list of comparisons sorted by Session-ID with the distance between the two components
  *
- * @return list with session-ID, pair, distance, average distance and the percentage
+ * @return list with session-ID, pair, distance and the percentage calculated by the longest distance per sub-session
  */
 fun spatialPercentage(
-    groupedSpatialDistances: Map<MutableList<String>, Int>,
-    sortedSpatialDistances: List<Triple<String, MutableList<String>, MutableList<Double>>>
+    spatialDistances: MutableList<Triple<String, MutableList<String>, MutableList<Double>>>
 ): MutableList<Triple<String, MutableList<String>, MutableList<Double>>> {
-    val list: MutableList<Triple<String, MutableList<String>, MutableList<Double>>> = arrayListOf()
-    var sum = 0.0
+    var cnt = 0
     var max = 0.0
-    for (element in groupedSpatialDistances) {
-        for (triple in sortedSpatialDistances) {
-            if (element.key == triple.second) {
-                sum += triple.third.first()
 
-                if (max < triple.third.first()) {
-                    max = triple.third.first()
-                }
-            }
+    for (i in spatialDistances.indices) {
+        if (max < spatialDistances[i].third.first()) {
+            max = spatialDistances[i].third.first()
         }
-        for (triple in sortedSpatialDistances) {
-            if (element.key == triple.second) {
-                triple.third.add(sum / element.value)
-
-                triple.third.add(triple.third.first() / max)
-
-                list.add(triple)
+        if ((i + 1) % 10 == 0) {
+            for (j in 0..9) {
+                spatialDistances[j + cnt].third.add(spatialDistances[j + cnt].third.first() / max)
             }
+            cnt += 10
+            max = 0.0
         }
-        max = 0.0
-        sum = 0.0
     }
-    return list
+    return spatialDistances
 }
 
 
@@ -116,7 +99,7 @@ fun spatialPercentage(
  * this function calculates the distances of the different pairs of the spatial tests
  *
  * @param completedSessions List with completed sessions
- * @param positions List with the absolute positions of each rectangle
+ * @param positions List with the absolute positions of each rectangle/component
  *
  * @return List with the session ID, the pairs, the Positions of the pairs and their distance
  */
@@ -151,3 +134,25 @@ fun spatialDistance(completedSessions: List<SpatialSession>, positions: List<Lis
     return positionLengths
 }
 
+/*for (element in groupedSpatialDistances) {
+    for (triple in sortedSpatialDistances) {
+        if (element.key == triple.second) {
+            sum += triple.third.first()
+
+            if (max < triple.third.first()) {
+                max = triple.third.first()
+            }
+        }
+    }
+    for (triple in sortedSpatialDistances) {
+        if (element.key == triple.second) {
+            triple.third.add(sum / element.value)
+
+            triple.third.add(triple.third.first() / max)
+
+            list.add(triple)
+        }
+    }
+    max = 0.0
+    sum = 0.0
+}*/
