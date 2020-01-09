@@ -6,7 +6,7 @@ import java.lang.Exception
 import kotlin.math.pow
 import kotlin.math.sqrt
 
-private var SPATIAL_HEADER = "SessionID,ConceptA,ConceptB,Distance,Percentage"
+private var SPATIAL_HEADER = "SessionID,ConceptA,ConceptB,Distance,Percentage,AvgPercentage"
 
 fun main() {
     val sessions = QSpatialSession().findList()
@@ -22,14 +22,16 @@ fun main() {
 
     val spatialDistances = spatialDistance(completedSessions, positions)
 
-    //spatialDistances.forEach { it.second.sort() }
-    //val sortedSpatialDistances = spatialDistances//.sortedBy { it.second[1] }.sortedBy { it.second[0] }
-
-    //only pairs with occurrence bigger than 2
-    //val groupedSpatialDistances = sortedSpatialDistances.groupingBy { it.second }.eachCount().filter { it.value > 2 }
 
     val list = spatialPercentage(spatialDistances)
-    list.map { println(it) }
+    /*
+    ************ Sortierungen *****************
+     */
+    list.forEach { it.second.sort() }
+    val sorted = list.sortedBy { it.second[1] }.sortedBy { it.second[0] }.toMutableList()
+    val groupedSpatialDistances = sorted.groupingBy { it.second }.eachCount()
+    val avgPercentage = averageRating(groupedSpatialDistances, sorted).sortedBy { it.third[2] }
+
 
     //export Data as CSV-File
     var fileWriter: FileWriter? = null
@@ -37,7 +39,7 @@ fun main() {
         fileWriter = FileWriter("./R/src/Spatial_Data.csv")
         fileWriter.append(SPATIAL_HEADER)
         fileWriter.append("\n")
-        list.map {
+        avgPercentage.map {
             fileWriter.append(it.first)
             fileWriter.append(",")
             fileWriter.append(it.second[0])
@@ -47,6 +49,8 @@ fun main() {
             fileWriter.append(it.third[0].toString())
             fileWriter.append(",")
             fileWriter.append(it.third[1].toString())
+            fileWriter.append(",")
+            fileWriter.append(it.third[2].toString())
             fileWriter.append("\n")
         }
         println("Finished writing!")
@@ -65,9 +69,30 @@ fun main() {
 }
 
 
+fun averageRating(groupedSpatialDistances: Map<MutableList<String>, Int>, sorted: MutableList<Triple<String, MutableList<String>, MutableList<Double>>>): MutableList<Triple<String, MutableList<String>, MutableList<Double>>> {
+    val list: MutableList<Triple<String, MutableList<String>, MutableList<Double>>> = arrayListOf()
+    var sum = 0.0
+
+    for (element in groupedSpatialDistances) {
+        for (triple in sorted) {
+            if (element.key == triple.second) {
+                sum += triple.third[1]
+            }
+        }
+        for (triple in sorted) {
+            if (element.key == triple.second) {
+                triple.third.add(sum / element.value)
+                list.add(triple)
+            }
+        }
+        sum = 0.0
+    }
+    return list
+}
+
+
 /**
- * this function calculates the percentage depending on the maximum of the pairs and also calculates the
- * average distance of each pair
+ * this function calculates the percentage depending on the maximum distance of the comparisons in each sub-session
  *
  * @param spatialDistances list of comparisons sorted by Session-ID with the distance between the two components
  *
@@ -96,7 +121,7 @@ fun spatialPercentage(
 
 
 /**
- * this function calculates the distances of the different pairs of the spatial tests
+ * this function calculates the distances of the different comparisons of the spatial tests
  *
  * @param completedSessions List with completed sessions
  * @param positions List with the absolute positions of each rectangle/component
@@ -130,29 +155,5 @@ fun spatialDistance(completedSessions: List<SpatialSession>, positions: List<Lis
             }
         }
     }
-
     return positionLengths
 }
-
-/*for (element in groupedSpatialDistances) {
-    for (triple in sortedSpatialDistances) {
-        if (element.key == triple.second) {
-            sum += triple.third.first()
-
-            if (max < triple.third.first()) {
-                max = triple.third.first()
-            }
-        }
-    }
-    for (triple in sortedSpatialDistances) {
-        if (element.key == triple.second) {
-            triple.third.add(sum / element.value)
-
-            triple.third.add(triple.third.first() / max)
-
-            list.add(triple)
-        }
-    }
-    max = 0.0
-    sum = 0.0
-}*/
