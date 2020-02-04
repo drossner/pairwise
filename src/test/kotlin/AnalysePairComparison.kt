@@ -22,9 +22,6 @@ fun main() {
     averageSession(sessions).forEach { println("Durchschnittliche Dauer und Rating der Session ${it.first.first}: ${it.first.second} ms, ${it.second}") }
     println("--------------------------------------------------------------------")
 
-    println(doubleComparisons(sessions))
-
-
     var fileWriter: FileWriter? = null
 
     //create/Write CVS-File for single sessions
