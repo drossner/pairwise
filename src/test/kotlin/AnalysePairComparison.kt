@@ -6,7 +6,7 @@ import java.lang.Exception
 
 
 private var COMPLETED_SESSION_HEADER = "Session,Avg Duration,Avg Rating"
-private var SINGLE_SESSION_HEADER = "SessionID,ConceptA,Rating,Duration,ConceptB"
+private var SINGLE_SESSION_HEADER = "SessionID,ConceptA,Rating,Duration,ConceptB,qstnr"
 
 
 private val sessions: MutableList<ComparsionSession> = QComparsionSession().findList()
@@ -34,16 +34,20 @@ fun main() {
         fileWriter.append(SINGLE_SESSION_HEADER)
         fileWriter.append("\n")
         for (session in completedSessions) {
-            fileWriter.append(session.session?.sessionId.toString())
-            fileWriter.append(",")
-            fileWriter.append(session.conceptA?.name)
-            fileWriter.append(",")
-            fileWriter.append(session.rating.toString())
-            fileWriter.append(",")
-            fileWriter.append(session.duration.toString())
-            fileWriter.append(",")
-            fileWriter.append(session.conceptB?.name)
-            fileWriter.append("\n")
+            with(fileWriter) {
+                append(session.session?.sessionId.toString())
+                append(",")
+                append(session.conceptA?.name)
+                append(",")
+                append(session.rating.toString())
+                append(",")
+                append(session.duration.toString())
+                append(",")
+                append(session.conceptB?.name)
+                append(",")
+                append(session.qstNr.toString())
+                append("\n")
+            }
         }
         println("Finished writing!")
     } catch (e: Exception) {

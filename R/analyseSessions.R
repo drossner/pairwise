@@ -1,11 +1,15 @@
-install.packages("ggplot2")
-install.packages("dplyr")
-install.packages("hrbrthemes")
+#install.packages("ggplot2")
+#install.packages("dplyr")
+#install.packages("hrbrthemes")
 
 ###Libraries
 library(ggplot2)
 library(dplyr)
 library(hrbrthemes)
+library(nortest)
+library(exptest)
+
+#hrbrthemes::import_roboto_condensed()
 
 ### import CSV-Files
 sessions <- read.csv("src/completedSessions.csv", sep = ",", fileEncoding = "UTF-8")
@@ -51,17 +55,45 @@ qqnorm(secondComparisons$Duration)
 qqline(secondComparisons$Duration)
 qqnorm(thirdComparisons$Duration)
 qqline(thirdComparisons$Duration)
-#qqnorm(lastComparisons$Duration)
-#qqline(lastComparisons$Duration)
+qqnorm(singleSessions$Duration)
+qqline(singleSessions$Duration)
 
+##Daniel Tests##
+qqnorm(log(singleSessions$Duration))
+exptest <- qexp(ppoints(length(singleSessions$Duration)))
+qqplot(exptest, singleSessions$Duration)
+qqplot(exptest, log(singleSessions$Duration))
+
+ggplot(data = singleSessions) +
+  geom_boxplot(mapping = aes(y=singleSessions$Duration)) +
+  ylab("Duration") +
+  ggtitle("Boxplot for the duration of all comparisons")
+
+
+boxplot(log(singleSessions$Duration) ~ singleSessions$qstnr)
+
+plot(density(log(singleSessions$Duration), adjust= 0.9), col=1) 
+plot(density(singleSessions$Duration, adjust= 0.9), col=1) #some high values
+
+shapiro.test(log(singleSessions$Duration))
+shapiro.test(singleSessions$Duration) #without log
+
+pearson.test(log(singleSessions$Duration))
+pearson.test(adjust = TRUE, log(singleSessions$Duration))
+
+ep.exp.test(singleSessions$Duration) #Test for exponentiality of Epps and Pulley
+shapiro.exp.test(singleSessions$Duration)
+frozini.exp.test(log(singleSessions$Duration))
+
+##Daniel Tests ende##
 
 ### Boxplot, Strich in der Mitte ist der Median, wenn dieser zentral in der Box liegt,
 ### liegt ebenfalls eine Normalverteilung vor
-ggplot(data = firstComparisons) + 
+ggplot(data = firstComparisons) +
   geom_boxplot(mapping = aes(y=firstComparisons$Duration)) + 
   ylab("Duration") + 
   ggtitle("Boxplot for the duration of all first comparisons") +
-  theme_ipsum()
+  theme_ipsum_rc()
 ggplot(data = secondComparisons) + 
   geom_boxplot(mapping = aes(y=secondComparisons$Duration)) + 
   ylab("Duration") + 
