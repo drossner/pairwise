@@ -22,16 +22,16 @@ fun main() {
 
     val spatialDistances = spatialDistance(completedSessions, positions)
 
-
-    val list = spatialPercentage(spatialDistances)
     /*
     ************ Sortierungen *****************
-     */
+    * */
+    val list = spatialPercentage(spatialDistances)
     list.forEach { it.second.sort() }
     val sorted = list.sortedBy { it.second[1] }.sortedBy { it.second[0] }.toMutableList()
     val groupedSpatialDistances = sorted.groupingBy { it.second }.eachCount()
     val avgPercentage = averageRating(groupedSpatialDistances, sorted).sortedBy { it.third[2] }
 
+    avgPercentage.map { println(it) }
 
     //export Data as CSV-File
     var fileWriter: FileWriter? = null
