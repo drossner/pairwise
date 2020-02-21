@@ -95,7 +95,7 @@
                     }
                     //start gameloop (OMG)
                     let speed = 0.1;
-                    let origFrames = 500;
+                    let origFrames = 500
                     //real frames = origFrames * speed > 25
                     setInterval(function () {
                         self.world.Step(1/origFrames, 4, 4); // as in android, max iteration collision, max pos iteration
