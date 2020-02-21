@@ -14,3 +14,10 @@ data class Pos(
     val x: Double,
     val y: Double
 )
+
+data class SimulationData(
+    val a: String,
+    val b: String,
+    val dist: Double,
+    val ratings: Int
+)

@@ -54,6 +54,7 @@ fun main() {
     app.get("/poll", MainController::default)
     app.get("/testpoll", SpatialController::default)
     app.get("/admin", VueComponent("admin-view"))
+    app.get("/simulation", VueComponent("simulation-view"))
     app.get("/about", Handler { it.result("Noch nichts") })
     app.get("/invalidate", Handler { ctx ->
         ctx.req.getSession().invalidate()
@@ -84,6 +85,8 @@ fun main() {
 
     app.post("/api/spatial/next", SpatialController::updateSession)
     app.post("/api/next", MainController::updateCompSesssion)
+
+    app.get("/admin/api/spatial/simulationdata", AdminController::getSimulationData)
 
     app.get("/admin/api/getcompsessions", AdminController::getCompSessions)
     app.get("/admin/api/compsession/:sessionId", AdminController::getCompSession)
