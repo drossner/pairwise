@@ -12,8 +12,8 @@ library(exptest)
 #hrbrthemes::import_roboto_condensed()
 
 ### import CSV-Files
-sessions <- read.csv("C:/Users/Chris/Documents/Uni/Arbeit/pairwise/R/src/completedSessions.csv", sep = ",", fileEncoding = "UTF-8")
-singleSessions <- read.csv("C:/Users/Chris/Documents/Uni/Arbeit/pairwise/R/src/singleSessions.csv", sep = ",", fileEncoding = "UTF-8")
+sessions <- read.csv("./src/completedSessions.csv", sep = ",", fileEncoding = "UTF-8")
+singleSessions <- read.csv("./src/singleSessions.csv", sep = ",", fileEncoding = "UTF-8")
 
 ### subsets für alle ersten, zweiten und dritten vergleiche
 ### für den Rest genauso vorgehen wie bei den anderen nur modulo anpassen
@@ -105,9 +105,9 @@ ggplot(data = thirdComparisons) +
   ggtitle("Boxplot for the duration of all third comparisons") +
   theme_ipsum()
 #ggplot(data = lastComparisons) + 
-#  geom_boxplot(mapping = aes(y=lastComparisons$Duration)) + 
-#  ylab("Duration") + 
-#  ggtitle("Boxplot for the duration of all eight comparisons")
+ # geom_boxplot(mapping = aes(y=lastComparisons$Duration)) + 
+  #ylab("Duration") + 
+  #ggtitle("Boxplot for the duration of all eight comparisons")
 
 
 ### Shapiro Wilk Tests für die ersten, zweiten, dritten,... Vergleiche

@@ -6,9 +6,10 @@ require(dplyr)
 
 library(ggplot2)
 library(dplyr)
+library(nortest)
+library(exptest)
 
-
-spatial_Session_data <- read.csv("C:/Users/Chris/Documents/Uni/Arbeit/pairwise/R/src/Spatial_Data.csv", sep = ",", fileEncoding = "UTF-8")
+spatial_Session_data <- read.csv("./src/Spatial_Data.csv", sep = ",", fileEncoding = "UTF-8")
 
 
 qqnorm(spatial_Session_data$AvgPercentage)
@@ -28,6 +29,7 @@ plot(density(avg))
 
 boxplot(avg)
 shapiro.test(avg)
+lillie.test(avg)
 hist(avg)
 
 
