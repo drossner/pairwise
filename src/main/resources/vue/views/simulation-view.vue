@@ -257,20 +257,22 @@
                 let delta = Math.abs(length - idealDistance);
                 let deltaGroup = Math.round((delta / idealDistance) * 10);
                 let color = "lightgray";
+                let opac = 1;
                 switch (deltaGroup) {
-                    case 0: color = "#1AE600"; break;
-                    case 1: color = "#33CC00"; break;
-                    case 2: color = "#4DB300"; break;
-                    case 3: color = "#669900"; break;
-                    case 4: color = "#808000"; break;
-                    case 5: color = "#996600"; break;
-                    case 6: color = "#B34D00"; break;
-                    case 7: color = "#CC3300"; break;
-                    case 8: color = "#E61A00"; break;
-                    case 9: color = "#FF0000"; break;
+                    case 0: opac = 0.5; color = "#1AE600"; break;
+                    case 1: opac = 0.55; color = "#33CC00"; break;
+                    case 2: opac = 0.6; color = "#4DB300"; break;
+                    case 3: opac = 0.65; color = "#669900"; break;
+                    case 4: opac = 0.7; color = "#808000"; break;
+                    case 5: opac = 0.75; color = "#996600"; break;
+                    case 6: opac = 0.8; color = "#B34D00"; break;
+                    case 7: opac = 0.85; color = "#CC3300"; break;
+                    case 8: opac = 0.9; color = "#E61A00"; break;
+                    case 9: opac = 1.0; color = "#FF0000"; break;
                     default: color = "#FF0000"
                 }
                 line.stroke(color);
+                line.opacity(opac);
                 line.getLayer().batchDraw();
             },
             getGroupBox: function (group) {
