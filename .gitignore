@@ -291,3 +291,4 @@ fabric.properties
 
 # Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
 !/gradle/wrapper/gradle-wrapper.jar
+/.idea/rSettings.xml
