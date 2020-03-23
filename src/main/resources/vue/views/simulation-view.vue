@@ -1,6 +1,15 @@
 <template id="simulation-view">
     <div class="row spatial-row mt-2 position-relative">
         <div class="col col-12" id="canvasContainer" ref="canvasContainer"></div>
+        <div class="col-6">
+            <b-form-input id="speed-range"
+                          v-model="speed"
+                          type="range"
+                          min="0.1"
+                          max="5" step="0.1">
+            </b-form-input>
+        </div>
+        <div class="mt-2 col-6">Geschwindigkeit: {{ speed }}</div>
     </div>
 </template>
 
@@ -17,7 +26,8 @@
                 distStep: 0,
                 world: null,
                 boxEdges: [],
-                lines: []
+                lines: [],
+                speed: .1
             }
         },
         mounted(){
@@ -64,9 +74,9 @@
                         shape.set_m_radius((konBox.width/2) / cam);
 
                         let fixture = new ph.b2FixtureDef();
-                        fixture.set_density(2);
+                        fixture.set_density(2); //2
                         fixture.set_friction(0.2); //0.2
-                        fixture.set_restitution(0.9);
+                        fixture.set_restitution(0.9); //0.9
                         fixture.set_shape(shape);
                         fixture.set_isSensor(false);
 
@@ -94,8 +104,7 @@
                         self.world.CreateJoint(jointDef);
                     }
                     //start gameloop (OMG)
-                    let speed = 0.1;
-                    let origFrames = 500
+                    let origFrames = 500;
                     //real frames = origFrames * speed > 25
                     setInterval(function () {
                         self.world.Step(1/origFrames, 4, 4); // as in android, max iteration collision, max pos iteration
@@ -115,7 +124,8 @@
                             self.updateLine.apply(self, [a.konvaNode, b.konvaNode, line, dist]);
                         }
                         self.stage.batchDraw();
-                    }, (1000/origFrames)/speed)
+                        console.info(self.speed);
+                    }, (1000/origFrames)/self.speed)
                 });
             });
         },
@@ -152,7 +162,7 @@
                     nodes[i] = this.createNode(concepts[i], Math.random()*this.stage.width(), Math.random()*this.stage.height());
                     this.concepts[i].konvaNode = nodes[i];
                 }
-
+                //console.info(concepts);
                 this.lines = this.createLines(nodes);
 
                 nodes.forEach(value => {
@@ -169,7 +179,7 @@
 
             createLines: function (nodeArr) {
                 let lineArr = [];
-                for(let i = 0; i < nodeArr.length - 1; i++){
+                for(let i = 0; i < nodeArr.length-1; i++){
                     for(let k = i + 1; k < nodeArr.length; k++){
                         //line between i and k
                         let nk = nodeArr[k], ni = nodeArr[i];
