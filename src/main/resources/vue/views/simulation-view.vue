@@ -106,6 +106,7 @@
                     //start gameloop (OMG)
                     let origFrames = 500;
                     //real frames = origFrames * speed > 25
+                    /*
                     setInterval(function () {
                         self.world.Step(1/origFrames, 4, 4); // as in android, max iteration collision, max pos iteration
                         //move konva stuff..
@@ -125,7 +126,36 @@
                         }
                         self.stage.batchDraw();
                         console.info(self.speed);
-                    }, (1000/origFrames)/self.speed)
+                        console.info((1000/origFrames)/self.speed);
+                    }, (1000/origFrames)/self.speed);
+                     */
+
+                    let interval = (1000/origFrames)/self.speed;
+                    let run = setInterval(request, interval);
+                    function request() {
+                        self.world.Step(1/origFrames, 4, 4); // as in android, max iteration collision, max pos iteration
+                        //move konva stuff..
+                        for(let i = 0; i < self.concepts.length; i++){
+                            let con = self.concepts[i];
+                            let nX = con.box2dNode.GetPosition().get_x() * cam;
+                            let nY = con.box2dNode.GetPosition().get_y() * cam;
+                            con.konvaNode.absolutePosition({x: nX, y: nY});
+                        }
+                        //lines..
+                        for(let i = 0; i < self.boxEdges.length; i++){
+                            let a = self.boxEdges[i].a;
+                            let b = self.boxEdges[i].b;
+                            let line = self.boxEdges[i].line;
+                            let dist = self.boxEdges[i].dist;
+                            self.updateLine.apply(self, [a.konvaNode, b.konvaNode, line, dist]);
+                        }
+                        self.stage.batchDraw();
+                        clearInterval(run);
+                        interval = (1000/origFrames)/self.speed;
+
+                        run = setInterval(request, interval);
+                        console.log(interval);
+                    }
                 });
             });
         },
