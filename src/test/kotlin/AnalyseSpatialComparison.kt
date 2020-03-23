@@ -6,7 +6,7 @@ import java.lang.Exception
 import kotlin.math.pow
 import kotlin.math.sqrt
 
-private var SPATIAL_HEADER = "SessionID,ConceptA,ConceptB,Distance,Percentage,AvgPercentage"
+private var SPATIAL_HEADER = "SessionID,ConceptA,ConceptB,Distance,QstNr,Duration,TotalClicks,Percentage,AvgPercentage"
 
 fun main() {
     val sessions = QSpatialSession().findList()
@@ -29,7 +29,7 @@ fun main() {
     list.forEach { it.second.sort() }
     val sorted = list.sortedBy { it.second[1] }.sortedBy { it.second[0] }.toMutableList()
     val groupedSpatialDistances = sorted.groupingBy { it.second }.eachCount()
-    val avgPercentage = averageRating(groupedSpatialDistances, sorted).sortedBy { it.third[2] }
+    val avgPercentage = averageRating(groupedSpatialDistances, sorted).sortedBy { it.third[5] }
 
     avgPercentage.map { println(it) }
 
@@ -40,17 +40,23 @@ fun main() {
         fileWriter.append(SPATIAL_HEADER)
         fileWriter.append("\n")
         avgPercentage.map {
-            fileWriter.append(it.first)
+            fileWriter.append(it.first) //id
             fileWriter.append(",")
-            fileWriter.append(it.second[0])
+            fileWriter.append(it.second[0]) //a concept
             fileWriter.append(",")
-            fileWriter.append(it.second[1])
+            fileWriter.append(it.second[1]) //b concept
             fileWriter.append(",")
-            fileWriter.append(it.third[0].toString())
+            fileWriter.append(it.third[0].toInt().toString()) //dist
             fileWriter.append(",")
-            fileWriter.append(it.third[1].toString())
+            fileWriter.append(it.third[1].toInt().toString()) //duration
             fileWriter.append(",")
-            fileWriter.append(it.third[2].toString())
+            fileWriter.append(it.third[2].toInt().toString()) //clicks
+            fileWriter.append(",")
+            fileWriter.append(it.third[3].toString()) //qstnr
+            fileWriter.append(",")
+            fileWriter.append(it.third[4].toString()) //percentage
+            fileWriter.append(",")
+            fileWriter.append(it.third[5].toString()) //avg percentage
             fileWriter.append("\n")
         }
         println("Finished writing!")
@@ -76,7 +82,7 @@ fun averageRating(groupedSpatialDistances: Map<MutableList<String>, Int>, sorted
     for (element in groupedSpatialDistances) {
         for (triple in sorted) {
             if (element.key == triple.second) {
-                sum += triple.third[1]
+                sum += triple.third[4]
             }
         }
         for (triple in sorted) {
@@ -147,7 +153,10 @@ fun spatialDistance(completedSessions: List<SpatialSession>, positions: List<Lis
                                     (positions[i][j][k].first - positions[i][j][l].first).pow(2.0) + (positions[i][j][k].second - positions[i][j][l].second).pow(
                                         2.0
                                     )
-                                )
+                                ),
+                                j.toDouble(),
+                                completedSessions[i].comparisons[j].duration.toDouble(),
+                                completedSessions[i].comparisons[j].clicksPerConcept.sum().toDouble()
                             )
                         )
                     )
