@@ -1,16 +1,16 @@
 <template id="simulation-view">
-    <div class="row spatial-row mt-2 position-relative">
+    <div class="row spatial-row mt-2 position-sticky">
         <div class="col col-12" id="canvasContainer" ref="canvasContainer"></div>
-        <div class="col-6">
-            <b-form-input id="speed-range"
-                          v-model="speed"
-                          type="range"
-                          min="0.1"
-                          max="1"
-                          step="0.1">
-            </b-form-input>
-        </div>
-        <div class="mt-2 col-6">Geschwindigkeit: {{ speed }}</div>
+        <b-form-input class="position-absolute m-2 col-6"
+                      style="bottom: 0"
+                      id="speed-range"
+                      v-model="speed"
+                      type="range"
+                      min="0.1"
+                      max="1"
+                      step="0.1">
+        </b-form-input>
+        <!--<div class="mt-2 col-6">Geschwindigkeit: {{ speed }}</div>-->
     </div>
 </template>
 
@@ -60,6 +60,7 @@
                     //fix factor of 10 like 100px = 10meter
                     let cam = 10;
                     //create bodies:
+                    //console.info(self.concepts.length);
                     for(let i = 0; i < self.concepts.length; i++) {
                         let kon = self.concepts[i].konvaNode;
                         let konPos = self.getGroupPos(kon);
@@ -76,8 +77,8 @@
 
                         let fixture = new ph.b2FixtureDef();
                         fixture.set_density(2); //2
-                        fixture.set_friction(0.2); //0.2
-                        fixture.set_restitution(0.9); //0.9
+                        fixture.set_friction(.2); //0.2
+                        fixture.set_restitution(.9); //0.9
                         fixture.set_shape(shape);
                         fixture.set_isSensor(false);
 
@@ -96,6 +97,7 @@
                         bodyA = bodyA.box2dNode;
                         bodyB = bodyB.box2dNode;
                         let jointDef = new ph.b2DistanceJointDef();
+                        jointDef.set_collideConnected(true);
                         jointDef.set_bodyA(bodyA);
                         jointDef.set_bodyB(bodyB);
                         jointDef.set_frequencyHz(3.0);
@@ -126,12 +128,12 @@
                             let dist = self.boxEdges[i].dist;
                             self.updateLine.apply(self, [a.konvaNode, b.konvaNode, line, dist]);
                         }
+
                         self.stage.batchDraw();
                         clearInterval(run);
                         origFrames = (1000/(interval*self.speed));
 
                         run = setInterval(request, interval);
-                        console.log(origFrames);
                     }
                 });
             });
@@ -188,6 +190,9 @@
                 let lineArr = [];
                 for(let i = 0; i < nodeArr.length-1; i++){
                     for(let k = i + 1; k < nodeArr.length; k++){
+
+
+
                         //line between i and k
                         let nk = nodeArr[k], ni = nodeArr[i];
                         let iBox = this.getGroupBox(ni);
@@ -200,22 +205,26 @@
                             strokeWidth: 2,
                         });
                         //get ideal distance
-                        let idealDistance = 0;
+                        let idealDistance = -1;
                         for(let i = 0; i < this.fullStorage.length; i++){
                             let tmp = [this.fullStorage[i].a, this.fullStorage[i].b];
                             if(tmp.includes(nk.textContent) && tmp.includes(ni.textContent)){
                                 idealDistance = this.fullStorage[i].dist; break;
                             }
                         }
-                        let self = this;
-                        nk.on('dragmove', function(){
-                            self.updateLine.apply(self, [nk, ni, line, idealDistance]);
-                        });
-                        ni.on('dragmove', function(){
-                            self.updateLine.apply(self, [nk, ni, line, idealDistance]);
-                        });
-                        line.ident = [nk.textContent, ni.textContent];
-                        lineArr.push(line);
+
+                        if(idealDistance !== -1) {
+                            let self = this;
+                            nk.on('dragmove', function(){
+                                self.updateLine.apply(self, [nk, ni, line, idealDistance]);
+                            });
+                            ni.on('dragmove', function(){
+                                self.updateLine.apply(self, [nk, ni, line, idealDistance]);
+                            });
+                            line.ident = [nk.textContent, ni.textContent];
+                            lineArr.push(line);
+                        }
+
                     }
                 }
                 return lineArr;
