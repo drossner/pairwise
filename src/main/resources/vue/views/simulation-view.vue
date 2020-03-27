@@ -17,7 +17,7 @@
 <script>
     Vue.component("simulation-view", {
         template: '#simulation-view',
-        data: function(){
+        data: function () {
             return {
                 stage: null,
                 concepts: [],
@@ -28,23 +28,24 @@
                 world: null,
                 boxEdges: [],
                 lines: [],
-                speed: .1
+                speed: .1,
+                ground: null,
             }
         },
-        mounted(){
+        mounted() {
             //this.createPollCanvas(this.$refs.canvasContainer);
             this.resize();
         },
-        created(){
+        created() {
             window.addEventListener("resize", this.resize);
             fetch("admin/api/spatial/simulationdata")
                 .then(res => res.json())
                 .then(json => {
                     this.fullStorage = json;
-                    for(let i = 0; i < this.fullStorage.length; i++){
-                        if(!this.concepts.some(elem => elem.name === this.fullStorage[i].a))
+                    for (let i = 0; i < this.fullStorage.length; i++) {
+                        if (!this.concepts.some(elem => elem.name === this.fullStorage[i].a))
                             this.concepts.push({name: this.fullStorage[i].a});
-                        if(!this.concepts.some(elem => elem.name === this.fullStorage[i].b))
+                        if (!this.concepts.some(elem => elem.name === this.fullStorage[i].b))
                             this.concepts.push({name: this.fullStorage[i].b});
                         this.minDist = Math.min(this.minDist, this.fullStorage[i].dist);
                         this.maxDist = Math.max(this.maxDist, this.fullStorage[i].dist);
@@ -57,11 +58,18 @@
                 }).then(self => {
                 Box2D().then(function (ph) {
                     self.world = new ph.b2World(new ph.b2Vec2(0.0, 0.0)); //0 gravity world
+
+
+                    //defining ground
+                    self.mouseJointGroundBody = self.world.CreateBody(new ph.b2BodyDef());
+
+
+
                     //fix factor of 10 like 100px = 10meter
                     let cam = 10;
                     //create bodies:
                     //console.info(self.concepts.length);
-                    for(let i = 0; i < self.concepts.length; i++) {
+                    for (let i = 0; i < self.concepts.length; i++) {
                         let kon = self.concepts[i].konvaNode;
                         let konPos = self.getGroupPos(kon);
                         let konBox = self.getGroupBox(kon);
@@ -73,12 +81,12 @@
                         bodyDef.set_angularDamping(0.9);
 
                         let shape = new ph.b2CircleShape();
-                        shape.set_m_radius((konBox.width/2) / cam);
+                        shape.set_m_radius((konBox.width / 2) / cam);
 
                         let fixture = new ph.b2FixtureDef();
-                        fixture.set_density(2); //2
-                        fixture.set_friction(.2); //0.2
-                        fixture.set_restitution(.9); //0.9
+                        fixture.set_density(1); //2
+                        fixture.set_friction(1); //0.2
+                        fixture.set_restitution(.5); //0.9
                         fixture.set_shape(shape);
                         fixture.set_isSensor(false);
 
@@ -88,7 +96,7 @@
                         body.CreateFixture(fixture); //does not work..
                         self.concepts[i].box2dNode = body;
                     }
-                    for(let i = 0; i < self.fullStorage.length; i++){
+                    for (let i = 0; i < self.fullStorage.length; i++) {
                         let edge = self.fullStorage[i];
                         let bodyA = self.concepts.find(elem => elem.name === edge.a);
                         let bodyB = self.concepts.find(elem => elem.name === edge.b);
@@ -109,19 +117,20 @@
 
                     //start gameloop (OMG)
                     let interval = 50;
-                    let origFrames = (1000/(interval*self.speed));
+                    let origFrames = (1000 / (interval * self.speed));
                     let run = setInterval(request, interval);
+
                     function request() {
-                        self.world.Step(1/origFrames, 4, 4); // as in android, max iteration collision, max pos iteration
+                        self.world.Step(1 / origFrames, 4, 4); // as in android, max iteration collision, max pos iteration
                         //move konva stuff..
-                        for(let i = 0; i < self.concepts.length; i++){
+                        for (let i = 0; i < self.concepts.length; i++) {
                             let con = self.concepts[i];
                             let nX = con.box2dNode.GetPosition().get_x() * cam;
                             let nY = con.box2dNode.GetPosition().get_y() * cam;
                             con.konvaNode.absolutePosition({x: nX, y: nY});
                         }
                         //lines..
-                        for(let i = 0; i < self.boxEdges.length; i++){
+                        for (let i = 0; i < self.boxEdges.length; i++) {
                             let a = self.boxEdges[i].a;
                             let b = self.boxEdges[i].b;
                             let line = self.boxEdges[i].line;
@@ -131,7 +140,7 @@
 
                         self.stage.batchDraw();
                         clearInterval(run);
-                        origFrames = (1000/(interval*self.speed));
+                        origFrames = (1000 / (interval * self.speed));
 
                         run = setInterval(request, interval);
                     }
@@ -139,18 +148,18 @@
             });
         },
         methods: {
-            resize: function(){
+            resize: function () {
                 const container = this.$refs.canvasContainer;
-                if(!container) return;
-                if(this.stage === null) return;
+                if (!container) return;
+                if (this.stage === null) return;
                 const h = container.offsetHeight;
                 const w = container.offsetWidth;
                 this.stage.width(w);
                 this.stage.height(h);
-                if(w < 576 ) this.stage.scale({x: 0.55, y: 0.55});
-                else if(w >= 576 && w < 768) this.stage.scale({x: 0.7, y: 0.7});
-                else if(w >= 768 && w < 992) this.stage.scale({x: 0.9, y: 0.9});
-                else if(w >= 992) this.stage.scale({x: 1, y: 1});
+                if (w < 576) this.stage.scale({x: 0.55, y: 0.55});
+                else if (w >= 576 && w < 768) this.stage.scale({x: 0.7, y: 0.7});
+                else if (w >= 768 && w < 992) this.stage.scale({x: 0.9, y: 0.9});
+                else if (w >= 992) this.stage.scale({x: 1, y: 1});
                 //$.toast('Width: '+w);
                 this.stage.batchDraw();
                 //console.log(this.stage.scale());
@@ -167,8 +176,8 @@
                 let concepts = this.concepts.map(concept => concept.name); //todo
                 let nodes = [];
                 let self = this;
-                for(let i = 0; i < concepts.length; i++){
-                    nodes[i] = this.createNode(concepts[i], Math.random()*this.stage.width(), Math.random()*this.stage.height());
+                for (let i = 0; i < concepts.length; i++) {
+                    nodes[i] = this.createNode(concepts[i], Math.random() * this.stage.width(), Math.random() * this.stage.height());
                     this.concepts[i].konvaNode = nodes[i];
                 }
                 //console.info(concepts);
@@ -188,9 +197,8 @@
 
             createLines: function (nodeArr) {
                 let lineArr = [];
-                for(let i = 0; i < nodeArr.length-1; i++){
-                    for(let k = i + 1; k < nodeArr.length; k++){
-
+                for (let i = 0; i < nodeArr.length - 1; i++) {
+                    for (let k = i + 1; k < nodeArr.length; k++) {
 
 
                         //line between i and k
@@ -206,25 +214,28 @@
                         });
                         //get ideal distance
                         let idealDistance = -1;
-                        for(let i = 0; i < this.fullStorage.length; i++){
+                        for (let i = 0; i < this.fullStorage.length; i++) {
                             let tmp = [this.fullStorage[i].a, this.fullStorage[i].b];
-                            if(tmp.includes(nk.textContent) && tmp.includes(ni.textContent)){
-                                idealDistance = this.fullStorage[i].dist; break;
+                            if (tmp.includes(nk.textContent) && tmp.includes(ni.textContent)) {
+                                idealDistance = this.fullStorage[i].dist;
+                                break;
                             }
                         }
 
-                        if(idealDistance !== -1) {
+
+
+                        //if idealDistance == -1, don't draw a line
+                        if (idealDistance !== -1) {
                             let self = this;
-                            nk.on('dragmove', function(){
+                            nk.on('dragmove', function () {
                                 self.updateLine.apply(self, [nk, ni, line, idealDistance]);
                             });
-                            ni.on('dragmove', function(){
+                            ni.on('dragmove', function () {
                                 self.updateLine.apply(self, [nk, ni, line, idealDistance]);
                             });
                             line.ident = [nk.textContent, ni.textContent];
                             lineArr.push(line);
                         }
-
                     }
                 }
                 return lineArr;
@@ -243,7 +254,7 @@
                 });
 
                 let content = new Konva.Text({
-                    x: -height/2, y: -6,
+                    x: -height / 2, y: -6,
                     width: height, height: height,
                     text: text,
                     //padding: 10,
@@ -251,11 +262,31 @@
                     align: 'center'
                 });
 
+
+                this.stage.on('dragmove', function () {
+                    let pos = group.getStage().getPointerPosition();
+                    let mouseX = pos.x;
+                    let mouseY = pos.y;
+                    console.log('x: ' +  mouseX+ ' | y: ' + mouseY);
+                });
+
                 group.add(rect);
                 group.add(content);
                 group.textContent = text;
                 return group;
             },
+
+            /*
+            createMouseJoint: function () {
+                this.stage.on('dragmove', function () {
+                    let pos = self.group.getStage().getPointerPosition();
+                    let mouseX = pos.x;
+                    let mouseY = pos.y;
+                    console.log('x: ' +  mouseX+ ' | y: ' + mouseY);
+                });
+            },
+            */
+
             updateLine: function (nodeA, nodeB, line, idealDistance) {
                 let aBox = this.getGroupBox(nodeA);
                 let bBox = this.getGroupBox(nodeB);
@@ -266,7 +297,7 @@
                 );
                 let fstA = line.points().slice(0, 2);
                 let sndA = line.points().slice(2, 4);
-                let length = Math.sqrt(Math.pow(fstA[0]-sndA[0], 2) + Math.pow(fstA[1]-sndA[1], 2));
+                let length = Math.sqrt(Math.pow(fstA[0] - sndA[0], 2) + Math.pow(fstA[1] - sndA[1], 2));
                 let minStroke = 0.1;
                 let maxStroke = 80;
                 //1000 => 0.1
@@ -274,7 +305,7 @@
                 let normedLength = Math.min(length, 1000);
                 normedLength = Math.max(normedLength, 60);
                 let normedStroke = (-0.03993403403) * normedLength + 40; //(2162/27); //Mathemagie (leicht verzaubert für 60..
-                let stroke = Math.min((1/length)*100, 50);
+                let stroke = Math.min((1 / length) * 100, 50);
                 //line.strokeWidth(normedStroke/2); //1118 vertical px in 1000 * 500
                 line.strokeWidth(3); //1118 vertical px in 1000 * 500
                 //calc delta and stroke
