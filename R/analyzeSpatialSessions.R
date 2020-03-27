@@ -8,6 +8,7 @@ library(ggplot2)
 library(dplyr)
 library(nortest)
 library(exptest)
+library(tidyr)
 
 spatial_Session_data <- read.csv("./src/Spatial_Data.csv", sep = ",", fileEncoding = "UTF-8")
 boxplot(spatial_Session_data$Duration/1000 ~ spatial_Session_data$QstNr, xlab="instance number", ylab="duration in s")
@@ -30,10 +31,22 @@ boxplot(TotalClicks ~ QstNr)
 
 detach(spatial_Session_data)
 
-qqnorm(spatial_Session_data$AvgPercentage)
-qqline(spatial_Session_data$AvgPercentage)
+filtered <- spatial_Session_data %>%
+  select(ConceptA, ConceptB, AvgPercentage) %>%
+  mutate(Ordered = ifelse(as.character(ConceptB) < as.character(ConceptA), paste(as.character(ConceptB),as.character(ConceptA)), paste(as.character(ConceptA),as.character(ConceptB)))) %>%
+  group_by(Ordered) %>%
+  summarise(n=n(), AvgPercentage = mean(AvgPercentage)) %>%
+  arrange(desc(AvgPercentage)) %>%
+  separate(Ordered, c("A", "B"), " ")
 
-plot(density(spatial_Session_data$AvgPercentage))
+qqnorm(filtered$AvgPercentage)
+qqline(filtered$AvgPercentage)
+plot(density(filtered$AvgPercentage))
+mean(filtered$AvgPercentage)
+median(filtered$AvgPercentage)
+shapiro.test(filtered$AvgPercentage)
+#df(spatial_Session_data$AvgPercentage)
+pearson.test(adjust=TRUE,filtered$AvgPercentage)
 
 x <- spatial_Session_data$AvgPercentage
 den <- density(log(spatial_Session_data$AvgPercentage))
@@ -56,5 +69,5 @@ spatComp  <- read.csv("src/spat-comb.csv", fileEncoding = "utf8")
 hist(spatComp$ratings)
 boxplot(spatComp$ratings)
 shapiro.test(spatComp$ratings)
-plot(density(spatComp$dist))
+  plot(density(spatComp$dist))
      
