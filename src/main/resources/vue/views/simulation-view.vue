@@ -20,7 +20,7 @@
         data: function () {
             return {
                 stage: null,
-                concepts: [],
+                concepts: [], //.name, .konvaNode (group), .box2dNode (body) //new: konvaNode.cIndex = index to get body e.g.
                 fullStorage: [],
                 minDist: 99999999999,
                 maxDist: 0,
@@ -30,6 +30,9 @@
                 lines: [],
                 speed: .1,
                 ground: null,
+                ph: {}, //box2d obj (PHysic)
+                mouseJoint: {},
+                dragging: false
             }
         },
         mounted() {
@@ -57,13 +60,19 @@
                     return this;
                 }).then(self => {
                 Box2D().then(function (ph) {
+                    self.ph = ph;
                     self.world = new ph.b2World(new ph.b2Vec2(0.0, 0.0)); //0 gravity world
 
-
                     //defining ground
-                    self.mouseJointGroundBody = self.world.CreateBody(new ph.b2BodyDef());
-
-
+                    let groundDef = new ph.b2BodyDef();
+                    groundDef.set_type(ph.b2_staticBody);
+                    let gshape = new ph.b2CircleShape();
+                    gshape.set_m_radius(3);
+                    let groundFixt = new ph.b2FixtureDef();
+                    groundFixt.set_isSensor(true);
+                    groundFixt.set_shape(gshape);
+                    self.ground = self.world.CreateBody(groundDef);
+                    self.ground.CreateFixture(groundFixt);
 
                     //fix factor of 10 like 100px = 10meter
                     let cam = 10;
@@ -112,7 +121,7 @@
                         jointDef.set_length(edge.dist / cam);
                         jointDef.set_dampingRatio(0.5); //0.5
 
-                        self.world.CreateJoint(jointDef);
+                        //self.world.CreateJoint(jointDef);
                     }
 
                     //start gameloop (OMG)
@@ -121,6 +130,13 @@
                     let run = setInterval(request, interval);
 
                     function request() {
+                        //update mouseJoint
+                        if(self.dragging){
+                            let pos = self.stage.getPointerPosition();
+                            //console.log(self.mouseJoint.GetType());
+                            //self.mouseJoint.SetTarget(new ph.b2Vec2(0, 0));
+                            self.mouseJoint.SetTarget(new ph.b2Vec2(pos.x/cam, pos.y/cam));
+                        }
                         self.world.Step(1 / origFrames, 4, 4); // as in android, max iteration collision, max pos iteration
                         //move konva stuff..
                         for (let i = 0; i < self.concepts.length; i++) {
@@ -178,7 +194,31 @@
                 let self = this;
                 for (let i = 0; i < concepts.length; i++) {
                     nodes[i] = this.createNode(concepts[i], Math.random() * this.stage.width(), Math.random() * this.stage.height());
+                    nodes[i].cIndex = i; //to come to e.g. the physics body
+                    nodes[i].draggable(false);
                     this.concepts[i].konvaNode = nodes[i];
+                    nodes[i].on('mousedown', function () {
+                        console.log("start drag");
+                        let pos = nodes[i].getStage().getPointerPosition(); //pixel
+                        //let bodyPos = self.concepts[i].box2dNode.GetPosition(); //physic
+                        //let vec = new self.ph.b2Vec2((pos.x/10) - bodyPos.get_x(), (pos.y/10) - bodyPos.get_y());
+                        ////console.log(bodyPos.get_x())
+                        //self.concepts[i].box2dNode.SetLinearVelocity(vec);
+                        //other
+                        let body = self.concepts[i].box2dNode;
+                        let jDef = new self.ph.b2MouseJointDef();
+                        jDef.set_bodyA(self.ground);
+                        jDef.set_bodyB (body);
+                        //jDef.set_target(new self.ph.b2Vec2(pos.x/10, pos.y/10)); //todo: cam to member var
+                        //jDef.set_target(new self.ph.b2Vec2(1000, 1000)); //todo: cam to member var
+                        jDef.set_maxForce(10000);
+                        //jDef.set_dampingRatio(0);
+                        self.mouseJoint = self.ph.castObject(self.world.CreateJoint(jDef), self.ph.b2MouseJoint);
+                        //self.mouseJoint.SetTarget(new self.ph.b2Vec2(100,100));
+                        body.SetAwake(true);
+                        console.log(self.world.GetJointCount());
+                        self.dragging = true;
+                    });
                 }
                 //console.info(concepts);
                 this.lines = this.createLines(nodes);
@@ -193,6 +233,13 @@
 
                 stage.add(lineLayer);
                 stage.add(mainLayer);
+                stage.on('mouseup', function () {
+                    if(self.dragging === true){
+                        console.log("stop drag");
+                        self.dragging = false;
+                        self.world.DestroyJoint(self.mouseJoint);
+                    }
+                })
             },
 
             createLines: function (nodeArr) {
@@ -263,12 +310,12 @@
                 });
 
 
-                this.stage.on('dragmove', function () {
-                    let pos = group.getStage().getPointerPosition();
-                    let mouseX = pos.x;
-                    let mouseY = pos.y;
-                    console.log('x: ' +  mouseX+ ' | y: ' + mouseY);
-                });
+                //this.stage.on('dragmove', function () {
+                //    let pos = group.getStage().getPointerPosition();
+                //    let mouseX = pos.x;
+                //    let mouseY = pos.y;
+                //    //console.log('x: ' +  mouseX+ ' | y: ' + mouseY);
+                //});
 
                 group.add(rect);
                 group.add(content);
