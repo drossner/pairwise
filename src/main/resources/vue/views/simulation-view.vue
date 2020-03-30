@@ -32,7 +32,8 @@
                 ground: null,
                 ph: {}, //box2d obj (PHysic)
                 mouseJoint: {},
-                dragging: false
+                dragging: false,
+                bodyPos: {}
             }
         },
         mounted() {
@@ -86,6 +87,7 @@
                         bodyDef.set_type(ph.b2_dynamicBody);
                         bodyDef.set_fixedRotation(true);
                         bodyDef.set_position(new ph.b2Vec2(konPos.x / cam, konPos.y / cam));
+                        //bodyDef.set_position(new ph.b2Vec2(konPos.x, konPos.y));
                         bodyDef.set_linearDamping(9);
                         bodyDef.set_angularDamping(0.9);
 
@@ -121,7 +123,7 @@
                         jointDef.set_length(edge.dist / cam);
                         jointDef.set_dampingRatio(0.5); //0.5
 
-                        //self.world.CreateJoint(jointDef);
+                        self.world.CreateJoint(jointDef);
                     }
 
                     //start gameloop (OMG)
@@ -133,9 +135,8 @@
                         //update mouseJoint
                         if(self.dragging){
                             let pos = self.stage.getPointerPosition();
-                            //console.log(self.mouseJoint.GetType());
                             //self.mouseJoint.SetTarget(new ph.b2Vec2(0, 0));
-                            self.mouseJoint.SetTarget(new ph.b2Vec2(pos.x/cam, pos.y/cam));
+                            self.mouseJoint.SetTarget(new ph.b2Vec2(((pos.x/cam) - self.bodyPos.get_x()), ((pos.y/cam) - self.bodyPos.get_y())));
                         }
                         self.world.Step(1 / origFrames, 4, 4); // as in android, max iteration collision, max pos iteration
                         //move konva stuff..
@@ -200,9 +201,8 @@
                     nodes[i].on('mousedown', function () {
                         console.log("start drag");
                         let pos = nodes[i].getStage().getPointerPosition(); //pixel
-                        //let bodyPos = self.concepts[i].box2dNode.GetPosition(); //physic
-                        //let vec = new self.ph.b2Vec2((pos.x/10) - bodyPos.get_x(), (pos.y/10) - bodyPos.get_y());
-                        ////console.log(bodyPos.get_x())
+                        let temp = self.concepts[i].box2dNode.GetPosition(); //physic
+                        self.bodyPos = new self.ph.b2Vec2(temp.get_x(), temp.get_y());
                         //self.concepts[i].box2dNode.SetLinearVelocity(vec);
                         //other
                         let body = self.concepts[i].box2dNode;
@@ -309,30 +309,11 @@
                     align: 'center'
                 });
 
-
-                //this.stage.on('dragmove', function () {
-                //    let pos = group.getStage().getPointerPosition();
-                //    let mouseX = pos.x;
-                //    let mouseY = pos.y;
-                //    //console.log('x: ' +  mouseX+ ' | y: ' + mouseY);
-                //});
-
                 group.add(rect);
                 group.add(content);
                 group.textContent = text;
                 return group;
             },
-
-            /*
-            createMouseJoint: function () {
-                this.stage.on('dragmove', function () {
-                    let pos = self.group.getStage().getPointerPosition();
-                    let mouseX = pos.x;
-                    let mouseY = pos.y;
-                    console.log('x: ' +  mouseX+ ' | y: ' + mouseY);
-                });
-            },
-            */
 
             updateLine: function (nodeA, nodeB, line, idealDistance) {
                 let aBox = this.getGroupBox(nodeA);
