@@ -70,7 +70,11 @@ ggplot(data = singleSessions) +
   ggtitle("Boxplot for the duration of all comparisons")
 
 
-boxplot(log(singleSessions$Duration) ~ singleSessions$qstnr)
+boxplot(log(singleSessions$Duration) ~ singleSessions$qstnr) #loged
+boxplot(singleSessions$Duration/1000 ~ singleSessions$qstnr) #not loged
+mean(singleSessions$Duration/1000) #average
+median(singleSessions$Duration/1000) #median
+
 
 plot(density(log(singleSessions$Duration), adjust= 0.9), col=1) 
 plot(density(singleSessions$Duration, adjust= 0.9), col=1) #some high values
