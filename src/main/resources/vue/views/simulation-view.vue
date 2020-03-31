@@ -129,7 +129,7 @@
                     console.log(self.distanceJoint.length);
 
                     //start gameloop (OMG)
-                    let interval = 50;
+                    let interval = 35;
                     let origFrames = (1000 / (interval * self.speed));
                     let run = setInterval(request, interval);
 
@@ -215,8 +215,8 @@
                         //jDef.set_target(new self.ph.b2Vec2(pos.x/10, pos.y/10)); //todo: cam to member var
                         //jDef.set_target(new self.ph.b2Vec2(1000, 1000)); //todo: cam to member var
                         jDef.set_maxForce(10000);
-                        //jDef.set_frequencyHz(100);
-                        //jDef.set_dampingRatio(0);
+                        jDef.set_frequencyHz(10);
+                        jDef.set_dampingRatio(0.5);
                         self.mouseJoint = self.ph.castObject(self.world.CreateJoint(jDef), self.ph.b2MouseJoint);
                         //self.mouseJoint.SetTarget(new self.ph.b2Vec2(100,100));
                         body.SetAwake(true);
