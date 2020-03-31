@@ -77,7 +77,7 @@
                     self.ground.CreateFixture(groundFixt);
 
                     //fix factor of 10 like 100px = 10meter
-                    let cam = 10;
+                    let cam = 50;
                     //create bodies:
                     //console.info(self.concepts.length);
                     for (let i = 0; i < self.concepts.length; i++) {
@@ -120,7 +120,7 @@
                         self.distanceJointDef[i].set_collideConnected(true);
                         self.distanceJointDef[i].set_bodyA(bodyA);
                         self.distanceJointDef[i].set_bodyB(bodyB);
-                        self.distanceJointDef[i].set_frequencyHz(3.0);
+                        self.distanceJointDef[i].set_frequencyHz(2.0);
                         self.distanceJointDef[i].set_length(edge.dist / cam);
                         self.distanceJointDef[i].set_dampingRatio(0.5); //0.5
 
@@ -200,6 +200,7 @@
                     nodes[i].cIndex = i; //to come to e.g. the physics body
                     nodes[i].draggable(false);
                     this.concepts[i].konvaNode = nodes[i];
+
                     nodes[i].on('mousedown', function () {
                         console.log("start drag");
                         //let pos = nodes[i].getStage().getPointerPosition(); //pixel
@@ -213,7 +214,8 @@
                         jDef.set_bodyB (body);
                         //jDef.set_target(new self.ph.b2Vec2(pos.x/10, pos.y/10)); //todo: cam to member var
                         //jDef.set_target(new self.ph.b2Vec2(1000, 1000)); //todo: cam to member var
-                        jDef.set_maxForce(100000);
+                        jDef.set_maxForce(10000);
+                        //jDef.set_frequencyHz(100);
                         //jDef.set_dampingRatio(0);
                         self.mouseJoint = self.ph.castObject(self.world.CreateJoint(jDef), self.ph.b2MouseJoint);
                         //self.mouseJoint.SetTarget(new self.ph.b2Vec2(100,100));
@@ -242,17 +244,22 @@
 
                 stage.add(lineLayer);
                 stage.add(mainLayer);
-                stage.on('mouseup', function () {
-                    if(self.dragging === true){
-                        console.log("stop drag");
-                        self.dragging = false;
-                        self.world.DestroyJoint(self.mouseJoint);
 
-                        for (let i = 0; i < self.distanceJointDef.length; i++) {
-                            self.distanceJoint.push(self.world.CreateJoint(self.distanceJointDef[i]));
+                window.addEventListener("mouseup", function () {
+                    //stage.on('mouseup', function () {
+                        if(self.dragging === true){
+                            console.log("stop drag");
+                            self.dragging = false;
+                            self.world.DestroyJoint(self.mouseJoint);
+
+                            for (let i = 0; i < self.distanceJointDef.length; i++) {
+                                self.distanceJoint.push(self.world.CreateJoint(self.distanceJointDef[i]));
+                            }
                         }
-                    }
+                    //})
                 })
+
+
             },
 
             createLines: function (nodeArr) {
