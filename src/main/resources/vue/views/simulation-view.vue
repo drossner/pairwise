@@ -10,7 +10,6 @@
                       max="1"
                       step="0.1">
         </b-form-input>
-        <!--<div class="mt-2 col-6">Geschwindigkeit: {{ speed }}</div>-->
     </div>
 </template>
 
@@ -32,6 +31,8 @@
                 ground: null,
                 ph: {}, //box2d obj (PHysic)
                 mouseJoint: {},
+                distanceJointDef: [],
+                distanceJoint: [],
                 dragging: false,
                 bodyPos: {}
             }
@@ -95,9 +96,9 @@
                         shape.set_m_radius((konBox.width / 2) / cam);
 
                         let fixture = new ph.b2FixtureDef();
-                        fixture.set_density(1); //2
-                        fixture.set_friction(1); //0.2
-                        fixture.set_restitution(.5); //0.9
+                        fixture.set_density(2); //2
+                        fixture.set_friction(.2); //0.2
+                        fixture.set_restitution(.9); //0.9
                         fixture.set_shape(shape);
                         fixture.set_isSensor(false);
 
@@ -115,16 +116,17 @@
                         self.boxEdges.push({a: bodyA, b: bodyB, line: line, dist: edge.dist});
                         bodyA = bodyA.box2dNode;
                         bodyB = bodyB.box2dNode;
-                        let jointDef = new ph.b2DistanceJointDef();
-                        jointDef.set_collideConnected(true);
-                        jointDef.set_bodyA(bodyA);
-                        jointDef.set_bodyB(bodyB);
-                        jointDef.set_frequencyHz(3.0);
-                        jointDef.set_length(edge.dist / cam);
-                        jointDef.set_dampingRatio(0.5); //0.5
+                        self.distanceJointDef[i] = new ph.b2DistanceJointDef();
+                        self.distanceJointDef[i].set_collideConnected(true);
+                        self.distanceJointDef[i].set_bodyA(bodyA);
+                        self.distanceJointDef[i].set_bodyB(bodyB);
+                        self.distanceJointDef[i].set_frequencyHz(3.0);
+                        self.distanceJointDef[i].set_length(edge.dist / cam);
+                        self.distanceJointDef[i].set_dampingRatio(0.5); //0.5
 
-                        self.world.CreateJoint(jointDef);
+                        self.distanceJoint.push(self.world.CreateJoint(self.distanceJointDef[i]));
                     }
+                    console.log(self.distanceJoint.length);
 
                     //start gameloop (OMG)
                     let interval = 50;
@@ -200,7 +202,7 @@
                     this.concepts[i].konvaNode = nodes[i];
                     nodes[i].on('mousedown', function () {
                         console.log("start drag");
-                        let pos = nodes[i].getStage().getPointerPosition(); //pixel
+                        //let pos = nodes[i].getStage().getPointerPosition(); //pixel
                         let temp = self.concepts[i].box2dNode.GetPosition(); //physic
                         self.bodyPos = new self.ph.b2Vec2(temp.get_x(), temp.get_y());
                         //self.concepts[i].box2dNode.SetLinearVelocity(vec);
@@ -211,13 +213,20 @@
                         jDef.set_bodyB (body);
                         //jDef.set_target(new self.ph.b2Vec2(pos.x/10, pos.y/10)); //todo: cam to member var
                         //jDef.set_target(new self.ph.b2Vec2(1000, 1000)); //todo: cam to member var
-                        jDef.set_maxForce(10000);
+                        jDef.set_maxForce(100000);
                         //jDef.set_dampingRatio(0);
                         self.mouseJoint = self.ph.castObject(self.world.CreateJoint(jDef), self.ph.b2MouseJoint);
                         //self.mouseJoint.SetTarget(new self.ph.b2Vec2(100,100));
                         body.SetAwake(true);
-                        console.log(self.world.GetJointCount());
+                        //console.log(self.world.GetJointCount());
                         self.dragging = true;
+
+                        console.log(self.distanceJoint.length);
+                        //console.log(self.distanceJoint.length);
+                        for (let j = 0; j < self.distanceJoint.length; j ++) {
+                            self.world.DestroyJoint(self.distanceJoint[j]);
+                        }
+                        self.distanceJoint = [];
                     });
                 }
                 //console.info(concepts);
@@ -238,6 +247,10 @@
                         console.log("stop drag");
                         self.dragging = false;
                         self.world.DestroyJoint(self.mouseJoint);
+
+                        for (let i = 0; i < self.distanceJointDef.length; i++) {
+                            self.distanceJoint.push(self.world.CreateJoint(self.distanceJointDef[i]));
+                        }
                     }
                 })
             },
