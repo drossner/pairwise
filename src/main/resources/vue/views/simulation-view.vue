@@ -34,7 +34,7 @@
                 distanceJointDef: [],
                 distanceJoint: [],
                 dragging: false,
-                bodyPos: {}
+                bodyPos: {},
             }
         },
         mounted() {
@@ -79,10 +79,10 @@
                     //fix factor of 10 like 100px = 10meter
                     let cam = 50;
                     //create bodies:
-                    //console.info(self.concepts.length);
                     for (let i = 0; i < self.concepts.length; i++) {
                         let kon = self.concepts[i].konvaNode;
                         let konPos = self.getGroupPos(kon);
+                        self.groupPosition = konPos;
                         let konBox = self.getGroupBox(kon);
                         let bodyDef = new ph.b2BodyDef();
                         bodyDef.set_type(ph.b2_dynamicBody);
@@ -126,19 +126,17 @@
 
                         self.distanceJoint.push(self.world.CreateJoint(self.distanceJointDef[i]));
                     }
-                    console.log(self.distanceJoint.length);
 
                     //start gameloop (OMG)
                     let interval = 35;
                     let origFrames = (1000 / (interval * self.speed));
                     let run = setInterval(request, interval);
-
                     function request() {
                         //update mouseJoint
                         if(self.dragging){
                             let pos = self.stage.getPointerPosition();
                             //self.mouseJoint.SetTarget(new ph.b2Vec2(0, 0));
-                            self.mouseJoint.SetTarget(new ph.b2Vec2(((pos.x/cam) - self.bodyPos.get_x()), ((pos.y/cam) - self.bodyPos.get_y())));
+                            self.mouseJoint.SetTarget(new ph.b2Vec2((((pos.x/self.stage.scaleX())/cam) - self.bodyPos.get_x()), (((pos.y/self.stage.scaleY())/cam) - self.bodyPos.get_y())));
                         }
                         self.world.Step(1 / origFrames, 4, 4); // as in android, max iteration collision, max pos iteration
                         //move konva stuff..
@@ -146,7 +144,7 @@
                             let con = self.concepts[i];
                             let nX = con.box2dNode.GetPosition().get_x() * cam;
                             let nY = con.box2dNode.GetPosition().get_y() * cam;
-                            con.konvaNode.absolutePosition({x: nX, y: nY});
+                            con.konvaNode.position({x: nX, y: nY});
                         }
                         //lines..
                         for (let i = 0; i < self.boxEdges.length; i++) {
@@ -156,7 +154,6 @@
                             let dist = self.boxEdges[i].dist;
                             self.updateLine.apply(self, [a.konvaNode, b.konvaNode, line, dist]);
                         }
-
                         self.stage.batchDraw();
                         clearInterval(run);
                         origFrames = (1000 / (interval * self.speed));
@@ -202,7 +199,7 @@
                     this.concepts[i].konvaNode = nodes[i];
 
                     nodes[i].on('mousedown', function () {
-                        console.log("start drag");
+                        //console.log("start drag");
                         //let pos = nodes[i].getStage().getPointerPosition(); //pixel
                         let temp = self.concepts[i].box2dNode.GetPosition(); //physic
                         self.bodyPos = new self.ph.b2Vec2(temp.get_x(), temp.get_y());
@@ -222,9 +219,6 @@
                         body.SetAwake(true);
                         //console.log(self.world.GetJointCount());
                         self.dragging = true;
-
-                        console.log(self.distanceJoint.length);
-                        //console.log(self.distanceJoint.length);
                         for (let j = 0; j < self.distanceJoint.length; j ++) {
                             self.world.DestroyJoint(self.distanceJoint[j]);
                         }
@@ -248,7 +242,7 @@
                 window.addEventListener("mouseup", function () {
                     //stage.on('mouseup', function () {
                         if(self.dragging === true){
-                            console.log("stop drag");
+                            //console.log("stop drag");
                             self.dragging = false;
                             self.world.DestroyJoint(self.mouseJoint);
 
@@ -288,8 +282,6 @@
                                 break;
                             }
                         }
-
-
 
                         //if idealDistance == -1, don't draw a line
                         if (idealDistance !== -1) {
@@ -334,7 +326,6 @@
                 group.textContent = text;
                 return group;
             },
-
             updateLine: function (nodeA, nodeB, line, idealDistance) {
                 let aBox = this.getGroupBox(nodeA);
                 let bBox = this.getGroupBox(nodeB);
@@ -346,6 +337,7 @@
                 let fstA = line.points().slice(0, 2);
                 let sndA = line.points().slice(2, 4);
                 let length = Math.sqrt(Math.pow(fstA[0] - sndA[0], 2) + Math.pow(fstA[1] - sndA[1], 2));
+                //length = length*this.stage.scaleX();
                 let minStroke = 0.1;
                 let maxStroke = 80;
                 //1000 => 0.1
@@ -360,7 +352,7 @@
                 //let delta = Math.min(Math.abs(length - idealDistance), this.maxDist); //delta max = max distance, delta min = 0
                 //let deltaGroup = Math.round(delta / this.distStep); // 0..9
                 let delta = Math.abs(length - idealDistance);
-                let deltaGroup = Math.round((delta / idealDistance) * 10);
+                let deltaGroup = Math.round((delta / idealDistance)*10);
                 let color = "lightgray";
                 let opac = 1;
                 switch (deltaGroup) {
@@ -378,6 +370,8 @@
                 }
                 line.stroke(color);
                 line.opacity(opac);
+
+                //todo aufruf in physik verschieben
                 line.getLayer().batchDraw();
             },
             getGroupBox: function (group) {
