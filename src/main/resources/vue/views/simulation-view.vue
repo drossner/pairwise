@@ -1,13 +1,10 @@
 <template id="simulation-view">
     <div class="row spatial-row mt-2 position-sticky">
         <div class="col col-12" id="canvasContainer" ref="canvasContainer"></div>
-        <b-row class="position-absolute m-2 form-group col-12" style="bottom: 0">
-            <b-col class="col-1">
-                <label>Speed: </label>
-            </b-col>
+        <b-row class="position-absolute m-2 form-group col-12 " style="bottom: 0">
+            <b-col class="col-1 position-relative"><label>Speed: </label></b-col>
             <b-col class="col-4">
-                <b-form-input class="form-inline"
-                              id="speed-range"
+                <b-form-input id="speed-range"
                               v-model="speed"
                               type="range"
                               min="0.1"
@@ -50,7 +47,7 @@
         },
         created() {
             window.addEventListener("resize", this.resize);
-            fetch("admin/api/spatial/simulationdata")
+            fetch("api/spatial/simulationdata")
                 .then(res => res.json())
                 .then(json => {
                     this.fullStorage = json;
