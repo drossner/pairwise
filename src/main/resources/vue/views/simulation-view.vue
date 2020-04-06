@@ -1,6 +1,20 @@
 <template id="simulation-view">
     <div class="row spatial-row mt-2 position-sticky">
         <div class="col col-12" id="canvasContainer" ref="canvasContainer"></div>
+        <div class="position-absolute m-2"style="top: 0">
+            <b-collapse visible id="collapse-3">
+                <b-card>
+                    simulation usage:<br/>
+                    drag-and-drop with left mouse button:<br/>
+                    - press the left mouse button and move the node<br/>
+                    - release the left mouse button and the moved node stays dynamic<br/>
+                    drag-and-drop with right mouse button:<br/>
+                    - press the right mouse button and move the node<br/>
+                    - release the right mouse button and the moved item changes its color and is fixed at the mouse position<br/>
+                    - to change the type of the node from static back to dynamic click the right mouse button on the node.</b-card>
+            </b-collapse>
+            <b-button v-b-toggle.collapse-3 class="position-absolute m-2" variant="primary">Help</b-button>
+        </div>
         <b-row class="position-absolute m-2 form-group col-12 " style="bottom: 0">
             <b-col class="col-1 position-relative"><label>Speed: </label></b-col>
             <b-col class="col-4">
@@ -12,6 +26,7 @@
                               step="0.1">
                 </b-form-input>
             </b-col>
+
         </b-row>
     </div>
 </template>
@@ -210,22 +225,22 @@
                     nodes[i].draggable(false);
                     this.concepts[i].konvaNode = nodes[i];
 
-                    //nodes[i].rightClicked = false;
+                    //drag-and-drop with right mouse button
+                    //set node body to static und changes color to red
                     nodes[i].on('click', function (e) {
                        if (e.evt.button === 2){
                            if (nodes[i].rightClicked === false){
                                nodes[i].rightClicked = true;
-                               console.log(nodes[i].rightClicked + ' ' + nodes[i].textContent);
                                nodes[i].getChildren()[0].fill('red');
                                self.concepts[i].box2dNode.SetType(self.ph.b2_staticBody);
                            }
                            else {
                                nodes[i].rightClicked = false;
-                               console.log(nodes[i].rightClicked + ' ' + nodes[i].textContent);
                                nodes[i].getChildren()[0].fill('white');
                                self.concepts[i].box2dNode.SetType(self.ph.b2_dynamicBody);
                            }
                        }
+                        console.log(self.concepts[i].box2dNode.GetType());
                     });
 
                     nodes[i].on('mousedown', function () {
