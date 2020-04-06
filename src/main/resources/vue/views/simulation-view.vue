@@ -85,8 +85,8 @@
                     let cam = 50;
                     //create bodies:
                     for (let i = 0; i < self.concepts.length; i++) {
+                        //self.concepts[i].rightClicked = false;
                         let kon = self.concepts[i].konvaNode;
-                        self.concepts[i].drag = false;
                         let konPos = self.getGroupPos(kon);
                         self.groupPosition = konPos;
                         let konBox = self.getGroupBox(kon);
@@ -198,11 +198,35 @@
                 let concepts = this.concepts.map(concept => concept.name); //todo
                 let nodes = [];
                 let self = this;
+
+                //prevent rightclick contentmenu
+                this.stage.on('contentContextmenu', (e) => {
+                    e.evt.preventDefault();
+                });
+
                 for (let i = 0; i < concepts.length; i++) {
                     nodes[i] = this.createNode(concepts[i], Math.random() * this.stage.width(), Math.random() * this.stage.height());
                     nodes[i].cIndex = i; //to come to e.g. the physics body
                     nodes[i].draggable(false);
                     this.concepts[i].konvaNode = nodes[i];
+
+                    //nodes[i].rightClicked = false;
+                    nodes[i].on('click', function (e) {
+                       if (e.evt.button === 2){
+                           if (nodes[i].rightClicked === false){
+                               nodes[i].rightClicked = true;
+                               console.log(nodes[i].rightClicked + ' ' + nodes[i].textContent);
+                               nodes[i].getChildren()[0].fill('red');
+                               self.concepts[i].box2dNode.SetType(self.ph.b2_staticBody);
+                           }
+                           else {
+                               nodes[i].rightClicked = false;
+                               console.log(nodes[i].rightClicked + ' ' + nodes[i].textContent);
+                               nodes[i].getChildren()[0].fill('white');
+                               self.concepts[i].box2dNode.SetType(self.ph.b2_dynamicBody);
+                           }
+                       }
+                    });
 
                     nodes[i].on('mousedown', function () {
                         self.clickedNode = nodes[i].textContent;
@@ -309,7 +333,8 @@
                 const width = 100, height = 60;
                 const group = new Konva.Group({
                     x: x, y: y,
-                    draggable: true
+                    draggable: true,
+                    rightClicked: false
                 });
 
                 let rect = new Konva.Circle({
@@ -326,10 +351,29 @@
                     fontSize: 12,
                     align: 'center'
                 });
+                /*
+                group.rightClicked = false;
+                group.on('click', function (e) {
+                    if (e.evt.button === 2){
+                        if (group.rightClicked === false){
+                            group.rightClicked = true;
+                            console.log(group.rightClicked + ' ' +  group.textContent);
+                            rect.fill('red');
+
+                        }
+                        else {
+                            group.rightClicked = false;
+                            console.log(group.rightClicked + ' ' +  group.textContent);
+                            rect.fill('white');
+                        }
+                    }
+                });
+                 */
 
                 group.add(rect);
                 group.add(content);
                 group.textContent = text;
+                group.rightClicked = false;
                 return group;
             },
             updateLine: function (nodeA, nodeB, line, idealDistance) {
