@@ -3,18 +3,20 @@
         <div class="col col-12" id="canvasContainer" ref="canvasContainer"></div>
         <div class="position-absolute m-2" style="top: 0">
             <b-collapse visible id="collapse-3">
-                <b-card>
-                    simulation usage:<br/>
-                    drag-and-drop with left mouse button:<br/>
-                    - press the left mouse button and move the node<br/>
-                    - release the left mouse button and the moved node stays dynamic<br/>
-                    drag-and-drop with right mouse button:<br/>
-                    - to fix the node at the mouse position, use ONLY right mouse button<br/>
-                    - press the right mouse button and move the node<br/>
-                    - release the right mouse button and the moved item changes its color and is fixed at the mouse
-                    position<br/>
-                    - to change the type of the node from static back to dynamic click the right mouse button on the
-                    node
+                <b-card style="font-size:0.8em">
+                    <ul>simulation usage:
+                        <li>drag-and-drop with left mouse button:
+                        <li>press the left mouse button and move the node
+                        <li>release the left mouse button and the moved node stays dynamic
+                        <li>drag-and-drop with right mouse button:
+                        <li>to fix the node at the mouse position, use ONLY right mouse button
+                        <li>press the right mouse button and move the node
+                        <li>release the right mouse button and the moved item changes its color and is fixed at the mouse
+                            position
+                        <li>to change the type of the node from static back to dynamic click the right mouse button on the
+                            node
+                    </ul>
+
                 </b-card>
             </b-collapse>
             <b-button v-b-toggle.collapse-3 class="position-absolute m-2" variant="primary">Help</b-button>
