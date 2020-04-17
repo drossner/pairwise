@@ -46,10 +46,10 @@ fun main() {
             "compId" to it.sessionAttribute<ComparsionSession>("compSession")?.sessionId.toString(),
             "spatId" to it.sessionAttribute<SpatialSession>("spatialSession")?.sessionId.toString(),
             "initSpat" to it.sessionAttribute<Boolean>("initSpat"),
-            "finishedSpat" to it.sessionAttribute<Boolean>("finishedSpat")
+            "finishedSpat" to it.sessionAttribute<Boolean>("finishedSpat"),
+            "isAdmin" to it.sessionAttribute<Boolean>("isAdmin")
         )
     }
-
 
     app.get("/", VueComponent("init-welcome"))
     app.get("/poll", MainController::default)
@@ -86,6 +86,7 @@ fun main() {
 
     app.post("/api/spatial/next", SpatialController::updateSession)
     app.post("/api/next", MainController::updateCompSesssion)
+    //app.post("/api/login", AdminController::validate);
 
     app.get("/api/spatial/simulationdata", SimulationController::getSimulationData)
 
@@ -97,6 +98,7 @@ fun main() {
 
     app.get("/auth/qwertz123", Handler {
         it.sessionAttribute("auth", true)
+        it.sessionAttribute("isAdmin", true)
         it.redirect(GLOB.BASE_PATH)
     })
 

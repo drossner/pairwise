@@ -103,6 +103,11 @@ object AdminController {
         ctx.json(res)
     }
 
+    fun isAdmin (ctx: Context) {
+        val authenticated = ctx.matchedPath().startsWith("/auth/qwertz123")
+        if (authenticated) ctx.sessionAttribute("isAdmin", true)
+    }
+
     fun getCompletedPolls(ctx: Context){
         val spatCount = QSpatialSession().comparisons.duration.gt(0).findList().map { session ->
             session.comparisons.all { it.duration > 0 }
