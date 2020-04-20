@@ -65,6 +65,15 @@ object AdminController {
         ctx.json(transList)
     }
 
+    fun validate(ctx: Context) {
+        val password = ctx.body<Password>()
+        println(password.password)
+        val pw = Password("qwertz123")
+        val isAdmin = (pw == password)
+        println(isAdmin)
+        ctx.json("result" to isAdmin)
+    }
+
     fun getSpatialComp(ctx: Context){
         //val comp = QSpatialComparison()
         //    .fetch("created")

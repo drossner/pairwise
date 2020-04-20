@@ -24,7 +24,7 @@
 <body>
 <script>
     Vue.component('login-modal', {
-        data () {
+        data() {
             return {
                 password: '',
                 passwordState: null
@@ -32,45 +32,52 @@
         },
         methods: {
             //check whether the input is valid or not
-            checkFormValidity: function() {
+            checkFormValidity: function () {
                 const valid = this.$refs.form.checkValidity();
                 this.passwordState = valid;
                 return valid;
             },
             //resets the password while hide and show
-            resetModal: function() {
+            resetModal: function () {
                 this.password = '';
                 this.passwordState = null;
             },
-            handleSubmit: function(event) {
+            handleSubmit: function (event) {
                 //prevent from closing the modal window
                 event.preventDefault();
                 this.sendToServer();
             },
 
             sendToServer: function () {
+                /*console.log(this.checkFormValidity());
                 if(!this.checkFormValidity()){
+                    console.log(this.checkFormValidity());
                     return
                 }
                 //logic send to server after that close modal manually
-                alert(this.password);
-                this.$bvModal.hide('login-modal');
+                console.log(this.password);
+                    console.log(this.checkFormValidity());
+                this.$bvModal.hide('login-modal');*/
+
+                const url = "api/login";
+                let password = {password: this.password};
+                let options = {
+                    method: 'POST',
+                    body: JSON.stringify(password)
+                };
+
+                fetch(url, options)
+                    .then(res => res.json())
+                    .then(json => {
+                        //wenn true auf hauptseite zurück
+                        //wenn false roter rand oder text
+                        /*if(json.result === true)
+                            this.$bvModal.hide('login-modal');
+                        //else
+                        */
+                        console.log(json)
+                    })
             }
-
-
-                /*fetch("api/login", {
-                method: 'POST',
-                body: JSON.stringify(this.password)
-                })
-                .then(res => res.json())
-                .then(json => {
-                    //wenn true auf hauptseite zurück
-                    //wenn false roter rand oder text
-                    if(json.result ===false) location.href = '.';
-                    else location.reload();
-                });
-
-                 */
         }
     })
 </script>

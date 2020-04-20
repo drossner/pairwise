@@ -37,3 +37,7 @@ data class SpatialItem(
     val clicksPerConcept: IntArray
 )
 
+data class Password(
+    val password: String
+)
+
