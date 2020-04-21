@@ -66,12 +66,15 @@ object AdminController {
     }
 
     fun validate(ctx: Context) {
-        val password = ctx.body<Password>()
-        println(password.password)
-        val pw = Password("qwertz123")
+        val password = ctx.body<Password>().password
+        val pw = "qwertz123"
         val isAdmin = (pw == password)
-        println(isAdmin)
-        ctx.json("result" to isAdmin)
+        ctx.json(isAdmin)
+
+        if (isAdmin) {
+            ctx.sessionAttribute("isAdmin", true)
+            ctx.sessionAttribute("auth", true)
+        }
     }
 
     fun getSpatialComp(ctx: Context){

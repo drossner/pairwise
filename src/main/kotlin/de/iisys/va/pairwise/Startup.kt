@@ -96,21 +96,17 @@ fun main() {
     app.get("/admin/api/spatsession/:sessionId", AdminController::getSpatialComp)
     app.get("/admin/api/spatsession/:sessionId/finishedcomps", AdminController::getSpatFinished)
 
-    app.get("/auth/qwertz123", Handler {
-        it.sessionAttribute("auth", true)
-        it.sessionAttribute("isAdmin", true)
-        it.redirect(GLOB.BASE_PATH)
-    })
-
     app.get("/no-auth", VueComponent("no-auth"))
 }
 
 fun accessManager(handler: Handler, ctx: Context, permittedRoles: Set<Role>){
     val finishedAll = ctx.sessionAttribute<Boolean>("finished")?:false
         && (ctx.sessionAttribute<Boolean>("finishedSpat"))?:false
+    val isAdmin = ctx.sessionAttribute<Boolean>("isAdmin")?:false
     when {
         ctx.host()?.contains("localhost", true)?: false -> handler.handle(ctx)
         ctx.matchedPath().startsWith("/admin", true).not() -> handler.handle(ctx)
+        isAdmin -> handler.handle(ctx)
         finishedAll -> handler.handle(ctx)
         ctx.sessionAttribute<Boolean>("auth")?:false -> handler.handle(ctx)
         else -> ctx.redirect("${GLOB.BASE_PATH}/no-auth")

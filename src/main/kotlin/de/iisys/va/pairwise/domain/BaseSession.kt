@@ -16,4 +16,6 @@ abstract class BaseSession {
     @WhenCreated
     var created: Timestamp? = null
 
+    var deleteFlag: Boolean = false
+
 }
