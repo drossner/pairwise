@@ -72,7 +72,6 @@ object SpatialController {
         val finished = session.currQst >= session.comparisons.size
         ctx.json(mapOf("moreData" to finished.not()))
         if(finished) ctx.sessionAttribute("finishedSpat", true)
-
     }
 
     fun getConcepts(ctx: Context){

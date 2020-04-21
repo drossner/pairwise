@@ -16,19 +16,69 @@
     <script src="webjars/jquery-toast-plugin/1.3.2/dist/jquery.toast.min.js"></script>
     <script src="webjars/konva/4.0.16/konva.js"></script>
 
+
     <script src="https://unpkg.com/vue-cookies@1.5.12/vue-cookies.js"></script>
     @componentRegistration
     <title>Test</title>
 </head>
 <body>
+<script>
+    Vue.component('login-modal', {
+        data() {
+            return {
+                password: '',
+                valid: true
+            }
+        },
+        methods: {
 
+            //resets the password while hide and show
+            resetModal: function () {
+                this.password = '';
+                this.valid = true;
+            },
+            handleSubmit: function (event) {
+                //prevent from closing the modal window
+                event.preventDefault();
+                this.sendToServer();
+            },
+            sendToServer: function () {
+                const url = "api/login";
+                let password = {password: this.password};
+                let options = {
+                    method: 'POST',
+                    body: JSON.stringify(password)
+                };
 
-    <main id="main-vue" v-cloak>
-        <div class="container-fluid">
+                fetch(url, options)
+                    .then(res => res.json())
+                    .then(json => {
+                        console.log(json);
+                        //wenn true auf hauptseite zurück
+                        //wenn false roter rand oder text
+                        if (json === true) {
+                            this.valid = true;
+                            this.$bvModal.hide('login-modal');
+                            location.href = ".";
+                        } else {
+                            this.valid = false;
+                            this.$refs.input.select();
+                        }
+                    })
+            }
+        }
+    })
+</script>
+
+<main id="main-vue" v-cloak>
+    <div class="container-fluid">
         <b-navbar toggleable="lg" variant="light" type="light">
             <b-navbar-brand href=".">Pairwise</b-navbar-brand>
             <b-navbar-nav>
-                <b-button v-b-modal.help-modal size="sm" class="my-2 my-sm-0" variant="outline-secondary">Help</b-button>
+                <b-button v-b-modal.help-modal size="sm" class="my-2 my-sm-0" variant="outline-secondary">Help
+                </b-button>
+                <b-button v-b-modal.login-modal size="sm" class="my-2 my-sm-0 m-2" variant="outline-secondary">Login
+                </b-button>
             </b-navbar-nav>
             <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
             <b-collapse id="nav-collapse" is-nav>
@@ -41,18 +91,48 @@
                 </b-navbar-nav>
             </b-collapse>
         </b-navbar>
-            <b-modal id="help-modal" title="Help">
-                <h6>Normal Poll</h6>
-                <p>You get shown <strong>two</strong> Concepts, which you should rate on a scale from 1 to 10.</p>
-                <ul>
-                    <li>1 means, that both concepts are barely or not related to each other</li>
-                    <li>10 means, that both concepts have a close relationship to each other</li>
-                </ul>
-                <p class="text-info">There is no absolute definition of what <strong>related</strong> means. Follow your intuition!</p>
-                <h6>Spatial Poll</h6>
-                <p>You see several concepts, piled up in the upper left corner of a 2D space. Your task is to organize these concepts in the available space, such that it makes sense to you. The grey lines between the concepts become thicker, the closer you drag the concepts together.</p>
-                <p class="text-info">There is no absolute definition of what <strong>related</strong> means. Follow your intuition!</p>
+
+        <login-modal inline-template>
+            <b-modal id="login-modal" @hidden="resetModal" @show="resetModal" title="Login" hide-footer>
+                <div>
+                    <b-form>
+                        <b-form-group id="password"
+                                      label="Password:"
+                                      label-for="password-input">
+                            <b-form-input ref="input" id="password-input"
+                                          type="password"
+                                          v-model="password"
+                                          required
+                                          autofocus
+                                          placeholder="Enter password"
+                                          @keydown.enter.native="handleSubmit">
+                            </b-form-input>
+                            <label v-if="(!valid)" class="alert-danger m-2">Wrong password! Try again.</label>
+                        </b-form-group>
+                        <b-button variant="secondary" @click="$bvModal.hide('login-modal')">Close</b-button>
+                        <b-button variant="primary" @click="handleSubmit">Submit</b-button>
+                    </b-form>
+                </div>
             </b-modal>
+        </login-modal>
+
+
+        <b-modal id="help-modal" title="Help">
+            <h6>Normal Poll</h6>
+            <p>You get shown <strong>two</strong> Concepts, which you should rate on a scale from 1 to 10.</p>
+            <ul>
+                <li>1 means, that both concepts are barely or not related to each other</li>
+                <li>10 means, that both concepts have a close relationship to each other</li>
+            </ul>
+            <p class="text-info">There is no absolute definition of what <strong>related</strong> means. Follow your
+                intuition!</p>
+            <h6>Spatial Poll</h6>
+            <p>You see several concepts, piled up in the upper left corner of a 2D space. Your task is to organize these
+                concepts in the available space, such that it makes sense to you. The grey lines between the concepts
+                become thicker, the closer you drag the concepts together.</p>
+            <p class="text-info">There is no absolute definition of what <strong>related</strong> means. Follow your
+                intuition!</p>
+        </b-modal>
 
         @routeComponent
 
@@ -64,9 +144,10 @@
                 </b-nav>
             </b-navbar>
         </div>
-        </div>
-    </main>
+    </div>
+</main>
 
-    <script src="js/main.js"></script>
+<script src="js/main.js"></script>
+
 </body>
 </html>
