@@ -1,5 +1,6 @@
 package de.iisys.va.pairwise.json
 
+import de.iisys.va.pairwise.domain.spatial.SpatialComparison
 import java.sql.Timestamp
 
 data class CompOverviewItem(
@@ -41,3 +42,7 @@ data class Password(
     val password: String
 )
 
+data class CheckedItems(
+    val resultComp: List<ConceptComparison>,
+    val resultSpat: List<SpatialComparison>
+)

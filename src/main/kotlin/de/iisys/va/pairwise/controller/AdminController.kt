@@ -65,18 +65,6 @@ object AdminController {
         ctx.json(transList)
     }
 
-    fun validate(ctx: Context) {
-        val password = ctx.body<Password>().password
-        val pw = "qwertz123"
-        val isAdmin = (pw == password)
-        ctx.json(isAdmin)
-
-        if (isAdmin) {
-            ctx.sessionAttribute("isAdmin", true)
-            ctx.sessionAttribute("auth", true)
-        }
-    }
-
     fun getSpatialComp(ctx: Context){
         //val comp = QSpatialComparison()
         //    .fetch("created")
@@ -115,11 +103,6 @@ object AdminController {
         ctx.json(res)
     }
 
-    fun isAdmin (ctx: Context) {
-        val authenticated = ctx.matchedPath().startsWith("/auth/qwertz123")
-        if (authenticated) ctx.sessionAttribute("isAdmin", true)
-    }
-
     fun getCompletedPolls(ctx: Context){
         val spatCount = QSpatialSession().comparisons.duration.gt(0).findList().map { session ->
             session.comparisons.all { it.duration > 0 }
@@ -129,5 +112,21 @@ object AdminController {
         }.count { it }
 
         ctx.json(mapOf("completedPoll" to spatCount+compCount))
+    }
+
+    fun validate(ctx: Context) {
+        val password = ctx.body<Password>().password
+        val pw = "qwertz123"
+        val isAdmin = (pw == password)
+        ctx.json(isAdmin)
+
+        if (isAdmin) {
+            ctx.sessionAttribute("isAdmin", true)
+            ctx.sessionAttribute("auth", true)
+        }
+    }
+
+    fun delete(ctx: Context){
+
     }
 }

@@ -12,6 +12,10 @@
                 :per-page="perPage" :current-page="currentPage"
                 @row-selected="onRowSelected" :tbody-tr-class="rowClass"
         >
+            <template v-slot:cell(delete)="item" v-if="isAdminFunc()">
+                <b-form-checkbox type="checkbox" :value="item.item" v-model="selectedCompItems"></b-form-checkbox>
+            </template>
+
             <template v-slot:table-busy>
                 <div class="text-center my-2">
                     <b-spinner class="align-middle"></b-spinner>
@@ -33,13 +37,15 @@
                 perPage: 20,
                 currentPage: 1,
                 isBusy: true,
+                selectedCompItems: [],
                 items: [],
                 fields:[
                     {key: "id", sortable: false},
                     {key: "created", sortable: true},
                     {key: "comparison_count", sortable: true},
                     {key: "avg_rating", sortable: true},
-                    {key: "avg_duration", sortable: true}
+                    {key: "avg_duration", sortable: true},
+                    {key: "delete", label: "Delete", sortable: false}
                 ]
             }
         },
@@ -79,6 +85,10 @@
             rowClass(item, type){
                 if(!item) return;
                 if(item.finished === false) return 'table-warning'
+            },
+            isAdminFunc() {
+                let state = this.$javalin.state;
+                return state.isAdmin;
             }
         }
     })
