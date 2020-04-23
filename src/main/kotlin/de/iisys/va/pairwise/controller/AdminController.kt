@@ -5,6 +5,7 @@ import de.iisys.va.pairwise.domain.pair.query.QComparsionSession
 import de.iisys.va.pairwise.domain.spatial.SpatialComparison
 import de.iisys.va.pairwise.domain.spatial.query.QSpatialSession
 import de.iisys.va.pairwise.json.*
+import io.ebean.DB
 import io.javalin.http.BadRequestResponse
 import io.javalin.http.Context
 import io.javalin.http.NotFoundResponse
@@ -22,7 +23,7 @@ object AdminController {
 
     fun getCompSessions(ctx: Context){
         //val sessions = QSpatialSession().orderBy().created.desc()
-        val sessions = QComparsionSession().orderBy().created.desc().findList()
+        val sessions = QComparsionSession().orderBy().created.desc().findList().filter { !it.deleteFlag }
         val transferList = LinkedList<CompOverviewItem>(
             sessions.map { session ->
                 val avgDur = session.comparisons.map { it.duration }.average()
@@ -51,7 +52,7 @@ object AdminController {
     }
 
     fun getSpatialSessions(ctx: Context){
-        val sessions = QSpatialSession().orderBy().created.desc().findList()
+        val sessions = QSpatialSession().orderBy().created.desc().findList().filter { !it.deleteFlag }
         val transList = LinkedList(
             sessions.map {
                 SpatialOverviewItem(
@@ -127,6 +128,27 @@ object AdminController {
     }
 
     fun delete(ctx: Context){
+        val comps = QComparsionSession().findList()
+        val spat = QSpatialSession().findList()
+        val resultComp = ctx.body<CheckedItems>().resultComp
+        val resultSpat = ctx.body<CheckedItems>().resultSpat
 
+        for (i in spat) {
+            for (j in resultSpat) {
+                if (i.sessionId.toString() == j) {
+                    i.deleteFlag = true
+                    DB.update(i)
+                }
+            }
+        }
+
+        for (i in comps) {
+            for (j in resultComp) {
+                if (i.sessionId.toString() == j) {
+                    i.deleteFlag = true
+                    DB.update(i)
+                }
+            }
+        }
     }
 }

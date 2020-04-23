@@ -43,6 +43,6 @@ data class Password(
 )
 
 data class CheckedItems(
-    val resultComp: List<ConceptComparison>,
-    val resultSpat: List<SpatialComparison>
+    val resultComp: MutableList<String>,
+    val resultSpat: MutableList<String>
 )

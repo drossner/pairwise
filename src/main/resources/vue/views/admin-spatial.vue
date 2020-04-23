@@ -13,7 +13,7 @@
                 :tbody-tr-class="rowClass"
         >
             <template v-slot:cell(delete)="item" v-if="isAdminFunc()">
-                <b-form-checkbox type="checkbox" :value="item.item" v-model="selectedSpatItems"></b-form-checkbox>
+                <b-form-checkbox type="checkbox" :value="item.item.id" v-model="selectedSpatId"></b-form-checkbox>
             </template>
 
             <template v-slot:table-busy>
@@ -46,7 +46,7 @@
                     currentPage: 1,
                     isBusy: true,
                     items: [],
-                    selectedSpatItems: [],
+                    selectedSpatId: [],
                     fields: [
                         {key: "id", sortable: false},
                         {key: "created", sortable: true},

@@ -13,7 +13,7 @@
                 @row-selected="onRowSelected" :tbody-tr-class="rowClass"
         >
             <template v-slot:cell(delete)="item" v-if="isAdminFunc()">
-                <b-form-checkbox type="checkbox" :value="item.item" v-model="selectedCompItems"></b-form-checkbox>
+                <b-form-checkbox type="checkbox" :value="item.item.id" v-model="selectedCompId"></b-form-checkbox>
             </template>
 
             <template v-slot:table-busy>
@@ -37,7 +37,7 @@
                 perPage: 20,
                 currentPage: 1,
                 isBusy: true,
-                selectedCompItems: [],
+                selectedCompId: [],
                 items: [],
                 fields:[
                     {key: "id", sortable: false},

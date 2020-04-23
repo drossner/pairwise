@@ -87,7 +87,6 @@ fun main() {
     app.post("/api/spatial/next", SpatialController::updateSession)
     app.post("/api/next", MainController::updateCompSesssion)
     app.post("/api/login", AdminController::validate)
-    app.post("/protected/admin/delete", AdminController::delete)
 
     app.get("/api/spatial/simulationdata", SimulationController::getSimulationData)
 
@@ -96,6 +95,8 @@ fun main() {
     app.get("/admin/api/getspatialsessions", AdminController::getSpatialSessions)
     app.get("/admin/api/spatsession/:sessionId", AdminController::getSpatialComp)
     app.get("/admin/api/spatsession/:sessionId/finishedcomps", AdminController::getSpatFinished)
+
+    app.post("/admin/api/protected/delete", AdminController::delete)
 
     app.get("/no-auth", VueComponent("no-auth"))
 }
