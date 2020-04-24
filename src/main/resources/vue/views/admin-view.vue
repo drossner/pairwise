@@ -57,7 +57,6 @@
 
                 //send arrays with items that should be removed
                 const url = "admin/api/protected/delete";
-                console.log(JSON.stringify(selectedCompId));
                 let options = {
                     method: 'POST',
                     header: {'Content-Type': 'application/json'},

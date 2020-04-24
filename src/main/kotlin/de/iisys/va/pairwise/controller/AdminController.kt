@@ -127,6 +127,8 @@ object AdminController {
         }
     }
 
+    //no real delete, change the deleteFlag from selected sessions to true
+    //in other place all sessions with deleteFlag = false are displayed
     fun delete(ctx: Context){
         val comps = QComparsionSession().findList()
         val spat = QSpatialSession().findList()

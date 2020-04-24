@@ -9,7 +9,7 @@ private var COMPLETED_SESSION_HEADER = "Session,Avg Duration,Avg Rating"
 private var SINGLE_SESSION_HEADER = "SessionID,ConceptA,Rating,Duration,ConceptB,qstnr"
 
 
-private val sessions: MutableList<ComparsionSession> = QComparsionSession().findList()
+private val sessions: MutableList<ComparsionSession> = QComparsionSession().findList().filter { !it.deleteFlag } as MutableList<ComparsionSession>
 
 fun main() {
     println(
