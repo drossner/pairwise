@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<migration xmlns="http://ebean-orm.github.io/xml/ns/dbmigration">
+    <changeSet type="apply">
+        <addColumn tableName="comparsion_session">
+            <column name="delete_flag" type="boolean" defaultValue="false" notnull="true"/>
+        </addColumn>
+        <addColumn tableName="spatial_session">
+            <column name="delete_flag" type="boolean" defaultValue="false" notnull="true"/>
+        </addColumn>
+    </changeSet>
+</migration>

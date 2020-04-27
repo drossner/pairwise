@@ -1,16 +1,18 @@
 <template id="admin-view">
     <div class="row mt-2">
         <div class="col col-12">
-            <div>
-                <b-button v-if="isAdminFunc()" @click="deleteSessions" class="position-absolute mr-3" variant="primary" style="right: 0">Delete</b-button>
-                <p v-else>Nicht authentifiziert</p>
-            </div>
+            <p v-if="!isAdminFunc()">Nicht authentifiziert</p>
+            <b-button-group class="position-absolute mr-3" style="right: 0">
+                <b-button v-if="isAdminFunc()" @click="deleteSessions" variant="outline-primary">Delete</b-button>
+                <b-button @click="hideUncompleted" :pressed.sync="toggle" variant="outline-primary">Hide uncompleted
+                </b-button>
+            </b-button-group>
             <b-tabs content-class="mt-2" v-model="tabIndex" @input="onTabChanged">
                 <b-tab title="Comparison">
-                    <admin-comparison ref="adminComparison"></admin-comparison>
+                    <admin-comparison v-on:comp-loaded="loadCompletedComp($event)" ref="adminComparison"></admin-comparison>
                 </b-tab>
                 <b-tab title="Spatial">
-                    <admin-spatial ref="adminSpatial"></admin-spatial>
+                    <admin-spatial v-on:spat-loaded="loadCompletedSpat($event)" ref="adminSpatial"></admin-spatial>
                 </b-tab>
             </b-tabs>
         </div>
@@ -20,20 +22,56 @@
 <script>
     Vue.component("admin-view", {
         template: "#admin-view",
-        data(){
+        data() {
             return {
-                tabIndex: 0
+                tabIndex: 0,
+                toggle: false,
+                compItems: [],
+                spatItems: [],
+                completedCompSessions: [],
+                completedSpatSessions: []
             }
         },
-        created(){
-            if(this.$cookies.isKey("admin-tab-index")){
+        created() {
+            if (this.$cookies.isKey("admin-tab-index")) {
                 this.tabIndex = parseInt(this.$cookies.get("admin-tab-index"), 10);
             } else {
                 this.$cookies.set("admin-tab-index", 0)
             }
         },
+
         methods: {
-            onTabChanged(tabIndex){
+            loadCompletedSpat(event) {
+                this.spatItems = this.$refs.adminSpatial.items;
+                for (let i = 0; i < event.length; i++)
+                    this.completedSpatSessions[i] = event[i];
+
+                if (this.$cookies.isKey("hide-uncompleted")) {
+                    this.toggle = JSON.parse(this.$cookies.get("hide-uncompleted"));
+                    if (JSON.parse(this.$cookies.get("hide-uncompleted"))) {
+                        this.$refs.adminSpatial.items = this.completedSpatSessions;
+                    }
+                } else {
+                    this.$cookies.set("hide-uncompleted", this.toggle);
+                }
+            },
+
+            loadCompletedComp(event) {
+                this.compItems = this.$refs.adminComparison.items;
+                for(let i = 0; i < event.length; i++)
+                    this.completedCompSessions[i] = event[i];
+
+                if(this.$cookies.isKey("hide-uncompleted")) {
+                    this.toggle = JSON.parse(this.$cookies.get("hide-uncompleted"));
+                    if(JSON.parse(this.$cookies.get("hide-uncompleted"))) {
+                        this.$refs.adminComparison.items = this.completedCompSessions;
+                    }
+                } else {
+                    this.$cookies.set("hide-uncompleted", this.toggle);
+                }
+            },
+
+            onTabChanged(tabIndex) {
                 this.$cookies.set("admin-tab-index", tabIndex)
             },
 
@@ -42,14 +80,22 @@
                 return state.isAdmin;
             },
 
-            deleteSessions: function() {
+            hideUncompleted() {
+                if (!JSON.parse(this.$cookies.get("hide-uncompleted"))) {
+                    this.$refs.adminComparison.items = this.completedCompSessions;
+                    this.$refs.adminSpatial.items = this.completedSpatSessions;
+                    this.$cookies.set("hide-uncompleted", this.toggle);
+
+                } else {
+                    this.$refs.adminComparison.items = this.compItems;
+                    this.$refs.adminSpatial.items = this.spatItems;
+                    this.$cookies.set("hide-uncompleted", this.toggle);
+                }
+            },
+            deleteSessions() {
                 //array with selected item id's that should be removed
                 let selectedCompId = this.$refs.adminComparison.selectedCompId;
                 let selectedSpatId = this.$refs.adminSpatial.selectedSpatId;
-
-                //array of objects with all items. remove the items in comp from compItems
-                let compItems = this.$refs.adminComparison.items;
-                let spatItems = this.$refs.adminSpatial.items;
 
                 //filter for matching item ids and return the list with items without them
                 this.$refs.adminComparison.items = compItems.filter(o1 => !selectedCompId.some(o2 => o1.id === o2));
@@ -67,7 +113,7 @@
                 };
                 fetch(url, options)
                     .then(res => {
-                        if(!res.ok){
+                        if (!res.ok) {
                             this.$refs.adminComparison.selectedCompId = [];
                             this.$refs.adminSpatial.selectedSpatId = [];
                             throw new Error("HTTP error " + res.status);

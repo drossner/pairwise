@@ -30,7 +30,7 @@
             </template>
             <template v-slot:row-details="row">
                 <b-card>
-                   <admin-spatial-sub :sessionid="row.item.id"></admin-spatial-sub>
+                    <admin-spatial-sub :sessionid="row.item.id"></admin-spatial-sub>
                 </b-card>
             </template>
         </b-table>
@@ -47,6 +47,7 @@
                     isBusy: true,
                     items: [],
                     selectedSpatId: [],
+                    finishedSpat: [],
                     fields: [
                         {key: "id", sortable: false},
                         {key: "created", sortable: true},
@@ -75,13 +76,20 @@
                                 finished: json[i].finished
                             });
                         }
+                        for (let i = 0; i < this.items.length; i++) {
+                            if (this.items[i].finished) {
+                                this.finishedSpat.push(this.items[i]);
+                            }
+                        }
+                        this.$emit('spat-loaded', this.finishedSpat);
                         this.isBusy = false;
                     })
                     .catch(err => {
                         $.toast("Server Error");
                         this.isBusy = false
-                    })
+                    });
             },
+
             computed: {
                 rows() {
                     return this.items.length
@@ -90,7 +98,7 @@
             methods: {
                 rowClass(item, type) {
                     if (!item) return;
-                    if (item.finished === false) return 'table-warning'
+                    if (item.finished === false) return 'table-warning';
                 },
                 isAdminFunc() {
                     let state = this.$javalin.state;
