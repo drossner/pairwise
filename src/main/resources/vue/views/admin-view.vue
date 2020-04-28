@@ -4,7 +4,7 @@
             <p v-if="!isAdminFunc()">Nicht authentifiziert</p>
             <b-button-group class="position-absolute mr-3" style="right: 0">
                 <b-button v-if="isAdminFunc()" @click="deleteSessions" variant="outline-primary">Delete</b-button>
-                <b-button @click="hideUncompleted" :pressed.sync="toggle" variant="outline-primary">Hide uncompleted
+                <b-button @click="hideUncompleted" :pressed.sync="toggle" value="btnText" variant="outline-primary">{{ btnText }}
                 </b-button>
             </b-button-group>
             <b-tabs content-class="mt-2" v-model="tabIndex" @input="onTabChanged">
@@ -26,6 +26,7 @@
             return {
                 tabIndex: 0,
                 toggle: false,
+                btnText: '',
                 compItems: [],
                 spatItems: [],
                 completedCompSessions: [],
@@ -38,6 +39,16 @@
             } else {
                 this.$cookies.set("admin-tab-index", 0)
             }
+
+            if (this.$cookies.isKey("hide-uncompleted")) {
+                if (JSON.parse(this.$cookies.get("hide-uncompleted"))) {
+                    this.btnText = "Show";
+                }
+                else this.btnText = "Hide"
+            }
+            else {
+                this.btnText = "Hide";
+            }
         },
 
         methods: {
@@ -48,11 +59,14 @@
 
                 if (this.$cookies.isKey("hide-uncompleted")) {
                     this.toggle = JSON.parse(this.$cookies.get("hide-uncompleted"));
+                    //this.btnText = "Show";
                     if (JSON.parse(this.$cookies.get("hide-uncompleted"))) {
                         this.$refs.adminSpatial.items = this.completedSpatSessions;
                     }
-                } else {
+                }
+                else {
                     this.$cookies.set("hide-uncompleted", this.toggle);
+                    //this.btnText = "Hide";
                 }
             },
 
@@ -65,9 +79,11 @@
                     this.toggle = JSON.parse(this.$cookies.get("hide-uncompleted"));
                     if(JSON.parse(this.$cookies.get("hide-uncompleted"))) {
                         this.$refs.adminComparison.items = this.completedCompSessions;
+                        //this.btnText = "Show";
                     }
                 } else {
                     this.$cookies.set("hide-uncompleted", this.toggle);
+                    //this.btnText = "Hide";
                 }
             },
 
@@ -85,11 +101,13 @@
                     this.$refs.adminComparison.items = this.completedCompSessions;
                     this.$refs.adminSpatial.items = this.completedSpatSessions;
                     this.$cookies.set("hide-uncompleted", this.toggle);
+                    this.btnText = "Show";
 
                 } else {
                     this.$refs.adminComparison.items = this.compItems;
                     this.$refs.adminSpatial.items = this.spatItems;
                     this.$cookies.set("hide-uncompleted", this.toggle);
+                    this.btnText = "Hide";
                 }
             },
             deleteSessions() {
@@ -98,8 +116,10 @@
                 let selectedSpatId = this.$refs.adminSpatial.selectedSpatId;
 
                 //filter for matching item ids and return the list with items without them
-                this.$refs.adminComparison.items = compItems.filter(o1 => !selectedCompId.some(o2 => o1.id === o2));
-                this.$refs.adminSpatial.items = spatItems.filter(o1 => !selectedSpatId.some(o2 => o1.id === o2));
+                this.$refs.adminComparison.items = this.compItems.filter(o1 => !selectedCompId.some(o2 => o1.id === o2));
+                this.$refs.adminSpatial.items = this.spatItems.filter(o1 => !selectedSpatId.some(o2 => o1.id === o2));
+                this.compItems = this.compItems.filter(o1 => !selectedCompId.some(o2 => o1.id === o2));
+                this.spatItems = this.spatItems.filter(o1 => !selectedSpatId.some(o2 => o1.id === o2));
 
                 //send arrays with items that should be removed
                 const url = "admin/api/protected/delete";
