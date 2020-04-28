@@ -7,7 +7,8 @@ var vm = new Vue({
             privacy: "#"
         },
         completedPoll: " ",
-        interval: null
+        interval: null,
+        showLogin: true
     },
     created () {
         fetch("api/consts")
@@ -29,10 +30,14 @@ var vm = new Vue({
                 .then(json => {
                     let x = json.completedPoll;
                     this.completedPoll = json.completedPoll;
-                })
-        }
+                });
+            this.isAdminFunc()
+        },
+        isAdminFunc: function () {
+            this.showLogin = !this.$javalin.state.isAdmin;
     },
     beforeDestroy() {
         clearInterval(this.interval)
+    }
     }
 });
