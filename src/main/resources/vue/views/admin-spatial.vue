@@ -12,6 +12,10 @@
                 :per-page="perPage" :current-page="currentPage"
                 :tbody-tr-class="rowClass"
         >
+            <template v-slot:cell(delete)="item" v-if="isAdminFunc()">
+                <b-form-checkbox type="checkbox" :value="item.item.id" v-model="selectedSpatId"></b-form-checkbox>
+            </template>
+
             <template v-slot:table-busy>
                 <div class="text-center my-2">
                     <b-spinner class="align-middle"></b-spinner>
@@ -26,7 +30,7 @@
             </template>
             <template v-slot:row-details="row">
                 <b-card>
-                   <admin-spatial-sub :sessionid="row.item.id"></admin-spatial-sub>
+                    <admin-spatial-sub :sessionid="row.item.id"></admin-spatial-sub>
                 </b-card>
             </template>
         </b-table>
@@ -42,12 +46,15 @@
                     currentPage: 1,
                     isBusy: true,
                     items: [],
+                    selectedSpatId: [],
+                    finishedSpat: [],
                     fields: [
                         {key: "id", sortable: false},
                         {key: "created", sortable: true},
                         {key: "concept_count", sortable: true},
                         {key: "comp_count", sortable: true},
-                        {key: "avg_duration", sortable: true, label: "Average Duration"}
+                        {key: "avg_duration", sortable: true, label: "Average Duration"},
+                        {key: "delete", label: "Delete", sortable: false}
                     ]
                 }
             },
@@ -69,13 +76,20 @@
                                 finished: json[i].finished
                             });
                         }
+                        for (let i = 0; i < this.items.length; i++) {
+                            if (this.items[i].finished) {
+                                this.finishedSpat.push(this.items[i]);
+                            }
+                        }
+                        this.$emit('spat-loaded', this.finishedSpat);
                         this.isBusy = false;
                     })
                     .catch(err => {
                         $.toast("Server Error");
                         this.isBusy = false
-                    })
+                    });
             },
+
             computed: {
                 rows() {
                     return this.items.length
@@ -84,7 +98,11 @@
             methods: {
                 rowClass(item, type) {
                     if (!item) return;
-                    if (item.finished === false) return 'table-warning'
+                    if (item.finished === false) return 'table-warning';
+                },
+                isAdminFunc() {
+                    let state = this.$javalin.state;
+                    return state.isAdmin;
                 }
             }
         }

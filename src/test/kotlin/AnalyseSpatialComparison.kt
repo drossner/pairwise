@@ -7,9 +7,9 @@ import kotlin.math.pow
 import kotlin.math.sqrt
 
 private var SPATIAL_HEADER = "SessionID,ConceptA,ConceptB,Distance,QstNr,Duration,TotalClicks,Percentage,AvgPercentage"
+private val sessions = QSpatialSession().findList().filter { !it.deleteFlag }
 
 fun main() {
-    val sessions = QSpatialSession().findList()
     val completedSessions = sessions.filter { !it.comparisons.any { it.duration <= 0 } }
 
     //height and width of an object: 100x80, start on the left upper corner

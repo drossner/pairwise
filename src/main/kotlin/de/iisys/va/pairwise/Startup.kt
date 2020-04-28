@@ -96,6 +96,8 @@ fun main() {
     app.get("/admin/api/spatsession/:sessionId", AdminController::getSpatialComp)
     app.get("/admin/api/spatsession/:sessionId/finishedcomps", AdminController::getSpatFinished)
 
+    app.post("/admin/api/protected/delete", AdminController::delete)
+
     app.get("/no-auth", VueComponent("no-auth"))
 }
 
