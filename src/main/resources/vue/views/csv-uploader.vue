@@ -84,6 +84,7 @@
                     });
                     //random sample
                     this.getSample(this.entities, 30);
+                    console.log(this.sample);
 
                     for (let i = 0; i < this.fileInputAsJSON.length; i++) {
                         if (this.rand.includes(this.fileInputAsJSON[i].Target) && this.rand.includes(this.fileInputAsJSON[i].Source)) {
@@ -110,7 +111,18 @@
             },
 
             csvSubmit() {
+                let url = "api/fillDB";
+                let options = {
+                    method: 'POST',
+                    header: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(this.sample)
+                };
 
+                fetch(url, options)
+                    .then(res => res.json())
+                    .then(json => console.log('Success: ', json))
+                    .catch(error => console.error('Error: ', error));
+                this.infoFlag = true;
             }
         }
     });

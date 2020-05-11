@@ -17,7 +17,7 @@ fun initDB() {
             DB.save(it)
         }
     }
-    if(QConcept().findCount() > 0) return
+    /*if(QConcept().findCount() > 0) return
     val names = arrayOf("Baum", "Busch", "Wald", "Stamm",
         "Ast", "Blatt", "Pflanze", "Wasser", "Luft", "Gas", "Cellulose", "Stein", "Mineral",
         "Photosynthesis", "Chemie", "Energie", "Gebäude", "Haus", "Mauer", "Straße", "Stadt",
@@ -28,4 +28,5 @@ fun initDB() {
     }
 
     DB.saveAll(conceptList)
+     */
 }

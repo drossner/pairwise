@@ -3,6 +3,7 @@ package de.iisys.va.pairwise.controller
 import de.iisys.va.pairwise.GLOB
 import de.iisys.va.pairwise.domain.pair.ComparsionSession
 import de.iisys.va.pairwise.domain.Concept
+import de.iisys.va.pairwise.domain.Connections
 import de.iisys.va.pairwise.domain.pair.ConceptComparison
 import de.iisys.va.pairwise.javalinvueextensions.componentwithProps
 import de.iisys.va.pairwise.json.ComparisonResponse
@@ -23,6 +24,10 @@ object MainController {
         //comparision session is set up
         if(finished) ctx.redirect("${GLOB.BASE_PATH}/");
         else componentwithProps("poll-view").handle(ctx)
+    }
+
+    fun fillDB(ctx: Context) {
+        println(ctx.body())
     }
 
     private fun initSession(ctx: Context) {

@@ -46,3 +46,11 @@ data class CheckedItems(
     val resultComp: MutableList<String>,
     val resultSpat: MutableList<String>
 )
+
+data class Connections(
+    val id: Long,
+    val source: String,
+    val target: String,
+    val sum: Int,
+    val weight: Float
+)
