@@ -7,11 +7,13 @@ import de.iisys.va.pairwise.domain.Connections
 import de.iisys.va.pairwise.domain.pair.ConceptComparison
 import de.iisys.va.pairwise.javalinvueextensions.componentwithProps
 import de.iisys.va.pairwise.json.ComparisonResponse
+import de.iisys.va.pairwise.json.Entities
 import de.iisys.va.pairwise.json.Poll
 import io.ebean.DB
 import io.javalin.http.BadRequestResponse
 import io.javalin.http.Context
 import io.javalin.http.NotFoundResponse
+import java.util.*
 
 object MainController {
 
@@ -27,7 +29,12 @@ object MainController {
     }
 
     fun fillDB(ctx: Context) {
-        println(ctx.body())
+
+        //println(ctx.body<Entities>().entities)
+        val entities = ctx.body<Entities>().entities
+        val conceptList:MutableList<Concept> = LinkedList()
+        for (entity in entities) conceptList.add(Concept().also { it.name = entity })
+        DB.saveAll(conceptList)
     }
 
     private fun initSession(ctx: Context) {

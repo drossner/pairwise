@@ -54,3 +54,7 @@ data class Connections(
     val sum: Int,
     val weight: Float
 )
+
+data class Entities(
+        val entities: MutableList<String>
+)

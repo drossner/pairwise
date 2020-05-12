@@ -84,7 +84,6 @@
                     });
                     //random sample
                     this.getSample(this.entities, 30);
-                    console.log(this.sample);
 
                     for (let i = 0; i < this.fileInputAsJSON.length; i++) {
                         if (this.rand.includes(this.fileInputAsJSON[i].Target) && this.rand.includes(this.fileInputAsJSON[i].Source)) {
@@ -103,6 +102,7 @@
                 reader.readAsText(this.csvFile);
                 ctx = 0;
                 this.infoFlag = false;
+                console.log(this.rand);
             },
 
             getSample(array, count) {
@@ -111,7 +111,7 @@
             },
 
             csvSubmit() {
-                let url = "api/fillDB";
+                /*let url = "api/fillDB";
                 let options = {
                     method: 'POST',
                     header: {'Content-Type': 'application/json'},
@@ -119,7 +119,19 @@
                 };
 
                 fetch(url, options)
-                    .then(res => res.json())
+                    //.then(res => res.json())
+                    .then(json => console.log('Success: ', json))
+                    .catch(error => console.error('Error: ', error));
+
+                 */
+                let url = "api/fillDB";
+                let options = {
+                    method: 'POST',
+                    header: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({entities: this.rand})
+                };
+                fetch(url, options)
+                    //.then(res => res.json())
                     .then(json => console.log('Success: ', json))
                     .catch(error => console.error('Error: ', error));
                 this.infoFlag = true;
