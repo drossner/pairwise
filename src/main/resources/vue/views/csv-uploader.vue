@@ -31,7 +31,7 @@
                 fileInput: '',
                 fileInputAsJSON: {},
                 entities: [],
-                sample: {},
+                sample: [],
                 rand: [],
                 avgWeight: 0,
                 infoFlag: true
@@ -44,7 +44,7 @@
                 this.fileInput= '';
                 this.fileInputAsJSON = {};
                 this.entities = [];
-                this.sample = {};
+                this.sample = [];
                 this.rand = [];
                 this.avgWeight = 0;
                 this.infoFlag = true;
@@ -54,6 +54,8 @@
                 let lines = csv.split("\n");
                 let result = [];
                 let headers = lines[0].split(";");
+                //headers = headers.join('~').toLowerCase().split('~');
+                for (let i = 0; i < headers.length; i++) headers[i] = headers[i].toLowerCase();
 
                 for (let i = 1; i < lines.length-1; i++) {
                     let obj = {};
@@ -75,8 +77,10 @@
 
                     //iterate over fileInputAsJSON and save entities..
                     for (let i = 0; i < this.fileInputAsJSON.length; i++) {
-                        if (!this.entities.includes(this.fileInputAsJSON[i].Target)) this.entities.push(this.fileInputAsJSON[i].Target);
-                        if (!this.entities.includes(this.fileInputAsJSON[i].Source)) this.entities.push(this.fileInputAsJSON[i].Source);
+                        if (!this.entities.includes(this.fileInputAsJSON[i].target))
+                            this.entities.push(this.fileInputAsJSON[i].target);
+                        if (!this.entities.includes(this.fileInputAsJSON[i].source))
+                            this.entities.push(this.fileInputAsJSON[i].source);
                     }
                     //filters NaN, null, not defined and ''
                     this.entities = this.entities.filter(el => {
@@ -86,8 +90,8 @@
                     this.getSample(this.entities, 30);
 
                     for (let i = 0; i < this.fileInputAsJSON.length; i++) {
-                        if (this.rand.includes(this.fileInputAsJSON[i].Target) && this.rand.includes(this.fileInputAsJSON[i].Source)) {
-                            this.sample[ctx] = this.fileInputAsJSON[i];
+                        if (this.rand.includes(this.fileInputAsJSON[i].target) && this.rand.includes(this.fileInputAsJSON[i].source)) {
+                            this.sample.push(this.fileInputAsJSON[i]);
                             ctx++;
                         }
                     }
@@ -95,45 +99,47 @@
                     //calculate the average weight of the CSV file
                     let sum = 0;
                     for (let i = 0; i < this.fileInputAsJSON.length; i++) {
-                        sum = sum + parseFloat(this.fileInputAsJSON[i].Weight);
+                        sum = sum + parseFloat(this.fileInputAsJSON[i].weight);
                     }
                     this.avgWeight = sum/this.fileInputAsJSON.length;
                 };
                 reader.readAsText(this.csvFile);
                 ctx = 0;
                 this.infoFlag = false;
-                console.log(this.rand);
+                console.log(this.sample);
             },
 
+            //array mit zahlen 0 bis indicies, zufällig rausholen und aus array löschen.
             getSample(array, count) {
                 for (let i = 0; i < count; i++)
                     this.rand.push(array[Math.floor(Math.random() * array.length)])
             },
 
             csvSubmit() {
-                /*let url = "api/fillDB";
-                let options = {
+                let urlConnections = "api/fillConnections";
+                let optionsConnections = {
                     method: 'POST',
                     header: {'Content-Type': 'application/json'},
                     body: JSON.stringify(this.sample)
                 };
 
-                fetch(url, options)
+                fetch(urlConnections, optionsConnections)
+                    //.then(res => res.json())
+                    .then(json => console.log('Success: ', json))
+                    .catch(error => console.error('Error: ', error));
+
+                /*let urlConcept = "api/fillConcept";
+                let optionsConcept = {
+                    method: 'POST',
+                    header: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({entities: this.rand})
+                };
+                fetch(urlConcept, optionsConcept)
                     //.then(res => res.json())
                     .then(json => console.log('Success: ', json))
                     .catch(error => console.error('Error: ', error));
 
                  */
-                let url = "api/fillDB";
-                let options = {
-                    method: 'POST',
-                    header: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({entities: this.rand})
-                };
-                fetch(url, options)
-                    //.then(res => res.json())
-                    .then(json => console.log('Success: ', json))
-                    .catch(error => console.error('Error: ', error));
                 this.infoFlag = true;
             }
         }

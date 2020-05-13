@@ -47,7 +47,7 @@ data class CheckedItems(
     val resultSpat: MutableList<String>
 )
 
-data class Connections(
+data class Connection(
     val id: Long,
     val source: String,
     val target: String,

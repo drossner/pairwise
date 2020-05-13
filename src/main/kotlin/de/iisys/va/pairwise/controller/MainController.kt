@@ -7,6 +7,7 @@ import de.iisys.va.pairwise.domain.Connections
 import de.iisys.va.pairwise.domain.pair.ConceptComparison
 import de.iisys.va.pairwise.javalinvueextensions.componentwithProps
 import de.iisys.va.pairwise.json.ComparisonResponse
+import de.iisys.va.pairwise.json.Connection
 import de.iisys.va.pairwise.json.Entities
 import de.iisys.va.pairwise.json.Poll
 import io.ebean.DB
@@ -28,9 +29,11 @@ object MainController {
         else componentwithProps("poll-view").handle(ctx)
     }
 
-    fun fillDB(ctx: Context) {
+    fun fillConnections(ctx: Context) {
+        println(ctx.body<Connection>().source)
+    }
 
-        //println(ctx.body<Entities>().entities)
+    fun fillConcept(ctx: Context) {
         val entities = ctx.body<Entities>().entities
         val conceptList:MutableList<Concept> = LinkedList()
         for (entity in entities) conceptList.add(Concept().also { it.name = entity })
