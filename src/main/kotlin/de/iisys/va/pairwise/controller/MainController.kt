@@ -40,33 +40,19 @@ object MainController {
     }
 
     fun fillConnections(ctx: Context) {
-        val conceptList = DB.find(Concept::class.java).findList()
-
+        val conceptMap = DB.find(Concept::class.java).findList().map { it.name to it }.toMap()
         val mapper = JavalinJackson.getObjectMapper()
         val connectionsList: MutableList<Connection> = mapper.readValue(ctx.body())
-        var connectionsListDB: MutableList<Connections> = LinkedList()
-        //conceptList.forEach { println(it.name) }
-
+        val connectionsListDB: MutableList<Connections> = LinkedList()
 
         for (connection in connectionsList) {
-            lateinit var source: Concept
-            lateinit var target: Concept
-            for (i in conceptList)
-                if (i.name == connection.source)
-                    source = i
-
-            for (i in conceptList)
-                if (i.name == connection.target)
-                    target = i
-
-            connectionsListDB.add(Connections(source, target).also {
-                it.sum = connection.sum
+            connectionsListDB.add(Connections(conceptMap[connection.source], conceptMap[connection.target]).also {
                 it.weight = connection.weight
+                it.sum = connection.sum
             })
         }
-        //connectionsListDB.forEach { println() }
+        //connectionsListDB.forEach { println(it) }
         DB.saveAll(connectionsListDB)
-
     }
 
     private fun initSession(ctx: Context) {
