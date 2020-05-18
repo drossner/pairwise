@@ -44,17 +44,29 @@ object MainController {
 
         val mapper = JavalinJackson.getObjectMapper()
         val connectionsList: MutableList<Connection> = mapper.readValue(ctx.body())
-        //val connectionsListDB: MutableList<Connections> = LinkedList()
-        conceptList.forEach { println(it.name) }
-        /*for (connection in connectionsList) {
-            connectionsListDB.add(Connections(connection.target, connection.source).also {
+        var connectionsListDB: MutableList<Connections> = LinkedList()
+        //conceptList.forEach { println(it.name) }
+
+
+        for (connection in connectionsList) {
+            lateinit var source: Concept
+            lateinit var target: Concept
+            for (i in conceptList)
+                if (i.name == connection.source)
+                    source = i
+
+            for (i in conceptList)
+                if (i.name == connection.target)
+                    target = i
+
+            connectionsListDB.add(Connections(source, target).also {
                 it.sum = connection.sum
                 it.weight = connection.weight
             })
         }
+        //connectionsListDB.forEach { println() }
         DB.saveAll(connectionsListDB)
-         */
-        //connectionsList.forEach { println(it) }
+
     }
 
     private fun initSession(ctx: Context) {

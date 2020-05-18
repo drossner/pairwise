@@ -114,7 +114,7 @@
                 ctx = 0;
                 this.infoFlag = false;
                 console.log(this.rand);
-                //console.log(this.sample);
+                console.log(this.sample)
             },
 
             //
