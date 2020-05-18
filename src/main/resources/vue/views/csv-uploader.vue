@@ -34,7 +34,8 @@
                 sample: [],
                 rand: [],
                 avgWeight: 0,
-                infoFlag: true
+                infoFlag: true,
+                limit: 0
             }
         },
         methods: {
@@ -44,12 +45,17 @@
                 this.fileInput= '';
                 this.fileInputAsJSON = {};
                 this.entities = [];
-                this.sample = [];
+                //this.sample = [];
                 this.rand = [];
                 this.avgWeight = 0;
                 this.infoFlag = true;
             },
 
+            /**
+             * converts an csv to an array with JSON objects
+             * @param csv with the connections between source target and their sum and weight
+             * @returns {Array} with JSON objects
+             */
             csvJSON(csv) {
                 let lines = csv.split("\n");
                 let result = [];
@@ -87,8 +93,9 @@
                         return el
                     });
                     //random sample
-                    this.getSample(this.entities, 30);
+                    this.getSample(30);
 
+                    //filter the matching random entities with the connections from the csv
                     for (let i = 0; i < this.fileInputAsJSON.length; i++) {
                         if (this.rand.includes(this.fileInputAsJSON[i].target) && this.rand.includes(this.fileInputAsJSON[i].source)) {
                             this.sample.push(this.fileInputAsJSON[i]);
@@ -106,41 +113,60 @@
                 reader.readAsText(this.csvFile);
                 ctx = 0;
                 this.infoFlag = false;
-                console.log(this.sample);
+                console.log(this.rand);
+                //console.log(this.sample);
             },
 
-            //array mit zahlen 0 bis indicies, zufällig rausholen und aus array löschen.
-            getSample(array, count) {
-                for (let i = 0; i < count; i++)
-                    this.rand.push(array[Math.floor(Math.random() * array.length)])
+            //
+            getSample(count) {
+                let idx, element;
+                for (let i = 0, limit = this.entities.length; i < count; i++) {
+                    //console.log(limit);
+                    //Math.floor return the biggest integer which is bigger or equals the given number (round off!)
+                    //random ziehen. nummer wird in idx gespeichert und das random element in element
+                    //save the random index in idx, and the random element in element
+                    idx = Math.floor((Math.random() * limit));
+                    element = this.entities[idx];
+                    //count limit one down, because we have drawn one element
+                    limit--;
+                    //save the lase element from entities where the random element was and save the random element
+                    //where the last element was. due to limit-- the last element wont be reached.
+                    this.entities[idx] = this.entities[limit];
+                    this.entities[limit] = element;
+                    this.rand.push(element);
+                }
             },
 
-            csvSubmit() {
-                let urlConnections = "api/fillConnections";
+
+            //csvSubmit as asynchronous fetch connections wait for the concepts
+            async csvSubmit() {
+                //send the entities to the server
+                let urlConcept = "api/fillconcept";
+                let optionsConcept = {
+                    method: 'POST',
+                    header: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({entities: this.rand})
+                };
+                 await fetch(urlConcept, optionsConcept)
+                //.then(res => res.json())
+                    .then(json => console.log('Success: ', json))
+                    .catch(error => console.error('Error: ', error));
+
+                //send the connections to the server
+                let urlConnections = "api/fillconnections";
                 let optionsConnections = {
                     method: 'POST',
                     header: {'Content-Type': 'application/json'},
                     body: JSON.stringify(this.sample)
                 };
 
-                fetch(urlConnections, optionsConnections)
+                await fetch(urlConnections, optionsConnections)
                     //.then(res => res.json())
                     .then(json => console.log('Success: ', json))
                     .catch(error => console.error('Error: ', error));
 
-                /*let urlConcept = "api/fillConcept";
-                let optionsConcept = {
-                    method: 'POST',
-                    header: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({entities: this.rand})
-                };
-                fetch(urlConcept, optionsConcept)
-                    //.then(res => res.json())
-                    .then(json => console.log('Success: ', json))
-                    .catch(error => console.error('Error: ', error));
-
-                 */
                 this.infoFlag = true;
+                this.clearFiles();
             }
         }
     });

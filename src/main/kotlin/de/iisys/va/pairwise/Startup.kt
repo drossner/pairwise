@@ -87,8 +87,8 @@ fun main() {
     app.post("/api/spatial/next", SpatialController::updateSession)
     app.post("/api/next", MainController::updateCompSesssion)
     app.post("/api/login", AdminController::validate)
-    app.post("api/fillConcept", MainController::fillConcept)
-    app.post("api/fillConnections", MainController::fillConnections)
+    app.post("api/fillconcept", MainController::fillConcept)
+    app.post("api/fillconnections", MainController::fillConnections)
 
     app.get("/api/spatial/simulationdata", SimulationController::getSimulationData)
 

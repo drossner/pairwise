@@ -1,5 +1,7 @@
 package de.iisys.va.pairwise.controller
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import de.iisys.va.pairwise.GLOB
 import de.iisys.va.pairwise.domain.pair.ComparsionSession
 import de.iisys.va.pairwise.domain.Concept
@@ -14,6 +16,7 @@ import io.ebean.DB
 import io.javalin.http.BadRequestResponse
 import io.javalin.http.Context
 import io.javalin.http.NotFoundResponse
+import io.javalin.plugin.json.JavalinJackson
 import java.util.*
 
 object MainController {
@@ -29,15 +32,29 @@ object MainController {
         else componentwithProps("poll-view").handle(ctx)
     }
 
-    fun fillConnections(ctx: Context) {
-        println(ctx.body<Connection>().source)
-    }
-
     fun fillConcept(ctx: Context) {
         val entities = ctx.body<Entities>().entities
         val conceptList:MutableList<Concept> = LinkedList()
         for (entity in entities) conceptList.add(Concept().also { it.name = entity })
         DB.saveAll(conceptList)
+    }
+
+    fun fillConnections(ctx: Context) {
+        val conceptList = DB.find(Concept::class.java).findList()
+
+        val mapper = JavalinJackson.getObjectMapper()
+        val connectionsList: MutableList<Connection> = mapper.readValue(ctx.body())
+        //val connectionsListDB: MutableList<Connections> = LinkedList()
+        conceptList.forEach { println(it.name) }
+        /*for (connection in connectionsList) {
+            connectionsListDB.add(Connections(connection.target, connection.source).also {
+                it.sum = connection.sum
+                it.weight = connection.weight
+            })
+        }
+        DB.saveAll(connectionsListDB)
+         */
+        //connectionsList.forEach { println(it) }
     }
 
     private fun initSession(ctx: Context) {
