@@ -56,6 +56,7 @@ fun main() {
     app.get("/testpoll", SpatialController::default)
     app.get("/admin", VueComponent("admin-view"))
     app.get("/simulation", VueComponent("simulation-view"))
+    app.get("/uploadfile", VueComponent("csv-uploader"))
     app.get("/about", Handler { it.result("Noch nichts") })
     app.get("/invalidate", Handler { ctx ->
         ctx.req.getSession().invalidate()

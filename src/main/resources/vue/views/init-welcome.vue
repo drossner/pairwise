@@ -5,12 +5,12 @@
                 <h1>Welcome to Pairwise</h1>
             </div>
         </div>
-        <div class="row mt-2" v-if="this.$javalin.state.isAdmin">
+        <!--<div class="row mt-2" v-if="this.$javalin.state.isAdmin">
             <div class="col col-4">
                 <p>Please select a CSV-file with which you would like to start a survey.</p>
                 <csv-uploader></csv-uploader>
             </div>
-        </div>
+        </div>-->
         <div class="row mt-2">
             <div class="col col-12">
                 <p>{{welcomeText}}</p>

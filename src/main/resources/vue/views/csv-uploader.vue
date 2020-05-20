@@ -1,24 +1,114 @@
 <template id="csv-uploader">
     <div>
+        <b-popover target="CompText" triggers="hover" placement="topleft">
+            <template v-slot:title>Pair Comparison Test</template>
+            <p>Rate the relationship between two concepts from your sample. You
+                have to rate the relationship between one and ten, with one being the lowest and ten the highest.</p>
+            <p>The value indicates how many comparisons you want to have per test. Based on our research, a user needs
+            about 40 seconds for a test with eight comparisons.</p>
+        </b-popover>
+        <b-popover target="SpatText" triggers="hover" placement="topleft">
+            <template v-slot:title>Spatial Comparison Test</template>
+            <p>comparison of several concepts in space. You can position the terms with drag and drop. The further the nodes are, the less they have to do with each other.</p>
+            <p>You can specify the number of tests and how many terms they contain.Based on our research, we recommend six tests with five concepts each.</p>
+        </b-popover>
+
+        <b-form-invalid-feedback id="quantity-feedback">Number must be greater than 2.</b-form-invalid-feedback>
+        <b-form-invalid-feedback id="number-of-pair-feedback">Number must be greater than 1 and not more than the half quantity.</b-form-invalid-feedback>
+        <b-form-invalid-feedback id="number-of-spat-feedback">Applied to spatial tests and their nodes: number of tests times nodes per test must be less than or equal to quantity.</b-form-invalid-feedback>
+
         <!-- accept only .csv other files can be added -->
-        <b-form-file
-                ref="csv-input"
-                v-model="csvFile"
-                :state="Boolean(csvFile)"
-                accept=".csv"
-                placeholder="Choose CSV-File or drop it here.."
-                drop-placeholder="Drop CSV-File here.."
-        ></b-form-file>
-        <!-- <p class="mt-3">Selected file: <b>{{ csvFile ? csvFile.name : '' }}</b></p> -->
-        <div>
-            <label>Entities: <b>{{ entities ? entities.length : 0 }}</b></label>
-        </div>
-        <div>
-            <label>Average weight: <b>{{ avgWeight ? avgWeight : 0 }}</b></label>
-        </div>
-        <b-button class="mt-2" @click="clearFiles()">Clear</b-button>
-        <b-button v-if="infoFlag" class="mt-2" @click="csvInfo()">Info</b-button>
-        <b-button v-else class="mt-2" @click="csvSubmit()">Submit</b-button>
+        <b-row class="mt-3 text-center" align-h="center">
+            <b-col cols="6"><h1><b>File Uploader</b></h1></b-col>
+        </b-row>
+
+        <b-row class="mt-3" align-h="center">
+            <b-col cols="6">
+                <p>Please select a CSV-file with which you would like to start a survey.</p>
+                <b-form-file
+                        ref="csv-input"
+                        v-model="csvFile"
+                        :state="Boolean(csvFile)"
+                        accept=".csv"
+                        placeholder="Choose CSV-File or drop it here.."
+                        drop-placeholder="Drop CSV-File here.."
+                ></b-form-file>
+            </b-col>
+        </b-row>
+
+        <b-row class="mt-3" align-h="center">
+            <b-col class="text-center" cols="3"><label>Sample quantity:</label></b-col>
+            <b-col cols="3">
+                <b-form-input aria-describedby="quantity-feedback" align-h="left" type="number" v-model="quantity" :state="quantityState" :min="2" step="1"></b-form-input>
+            </b-col>
+        </b-row>
+
+        <b-row align-h="center">
+            <b-col cols="3">
+                <div class="mt-3 text-center">
+                    <label>Entities: {{ entities ? entities.length : 0 }}</label>
+                </div>
+            </b-col>
+            <b-col cols="3">
+                <div class="mt-3 text-center">
+                    <label>Average weight: {{ avgWeight ? avgWeight : 0 }}</label>
+                </div>
+            </b-col>
+        </b-row>
+
+        <!-- choose the tests and customize them -->
+        <b-row class="mt-3" align-h="center">
+            <b-col class="text-center" cols="6"><h3><b>Choose your Tests</b></h3></b-col>
+        </b-row>
+        <b-row class="mt-3" align-h="center">
+            <b-col id="CompText" class="text-center" cols="2"><label><b>Pair Comparison Test</b></label></b-col>
+            <b-col class="text-center" cols="1">
+                <b-form-checkbox
+                        id="CompCheckbox"
+                        v-model="status_comp"
+                        value="comp_accepted"
+                        unchecked-value="comp_not_accepted"></b-form-checkbox>
+            </b-col>
+            <b-col id="SpatText" class="text-center" cols="2"><label><b>Spatial Comparison Test</b></label></b-col>
+            <b-col class="text-center" cols="1">
+                <b-form-checkbox
+                        id="SpatCheckbox"
+                        v-model="status_spat"
+                        value="spat_accepted"
+                        unchecked-value="spat_not_accepted"></b-form-checkbox>
+            </b-col>
+        </b-row>
+        <b-row align-h="center">
+            <b-col cols="3">
+                <div class="mt-3">
+                    <p>Number of pair comparisons:</p>
+                    <b-form-input v-bind:disabled="status_comp === 'comp_not_accepted'" align-h="left" required
+                                  type="number" :state="numberOfCompsState" v-model="number_of_comparisons" aria-describedby="number-of-pair-feedback" :min="1" step="1"></b-form-input>
+                </div>
+            </b-col>
+            <b-col cols="3">
+                <div>
+                    <p class="mt-3">Number of spatial tests:</p>
+                    <b-form-input class="mt-3" v-bind:disabled="status_spat === 'spat_not_accepted'" align-h="left"
+                                  type="number" :state="numberOfTestsState" v-model="number_of_tests" aria-describedby="number-of-spat-feedback" :min="1" step="1"></b-form-input>
+                    <p class="mt-3">Number of nodes per test:</p>
+                    <b-form-input class="mt-3" v-bind:disabled="status_spat === 'spat_not_accepted'" align-h="left"
+                                  type="number" :state="numberOfTestsState" v-model="nodes_per_test" aria-describedby="number-of-spat-feedback" :min="2" step="1"></b-form-input>
+                </div>
+            </b-col>
+        </b-row>
+
+        <b-row class="mt-3" align-h="center">
+            <b-col cols="3">
+                <b-button block @click="clearFiles()" variant="primary">Clear</b-button>
+            </b-col>
+            <b-col v-if="infoFlag" cols="3">
+                <b-button block @click="csvInfo()" variant="primary">Info</b-button>
+            </b-col>
+            <b-col v-else cols="3">
+                <b-button block @click="csvSubmit()" variant="primary">Submit</b-button>
+            </b-col>
+        </b-row>
     </div>
 </template>
 
@@ -27,6 +117,7 @@
         template: "#csv-uploader",
         data: function () {
             return {
+                //upload
                 csvFile: null,
                 fileInput: '',
                 fileInputAsJSON: {},
@@ -35,14 +126,37 @@
                 rand: [],
                 avgWeight: 0,
                 infoFlag: true,
-                limit: 0
+                limit: 0,
+
+                //test customization
+                quantity: 2,
+                status_comp: 'comp_not_accepted',
+                status_spat: 'spat_not_accepted',
+                number_of_comparisons: 2,
+                number_of_tests: 1,
+                nodes_per_test: 2
+
             }
         },
+
+        computed: {
+            numberOfCompsState() {
+                return ((this.number_of_comparisons * 2 <= this.quantity) && (this.number_of_comparisons >= 1))
+            },
+            quantityState() {
+                return this.quantity >= 2 && this.quantity <= this.entities.length
+            },
+            numberOfTestsState() {
+                return this.number_of_tests*this.nodes_per_test <= this.quantity
+            }
+        },
+
         methods: {
             clearFiles() {
                 this.$refs["csv-input"].reset();
+                this.quantity = 0;
                 this.csvFile = null;
-                this.fileInput= '';
+                this.fileInput = '';
                 this.fileInputAsJSON = {};
                 this.entities = [];
                 //this.sample = [];
@@ -63,7 +177,7 @@
                 //headers = headers.join('~').toLowerCase().split('~');
                 for (let i = 0; i < headers.length; i++) headers[i] = headers[i].toLowerCase();
 
-                for (let i = 1; i < lines.length-1; i++) {
+                for (let i = 1; i < lines.length - 1; i++) {
                     let obj = {};
                     let currentLine = lines[i].split(";");
                     for (let j = 0; j < headers.length; j++) {
@@ -93,7 +207,7 @@
                         return el
                     });
                     //random sample
-                    this.getSample(30);
+                    this.getSample();
 
                     //filter the matching random entities with the connections from the csv
                     for (let i = 0; i < this.fileInputAsJSON.length; i++) {
@@ -108,7 +222,7 @@
                     for (let i = 0; i < this.fileInputAsJSON.length; i++) {
                         sum = sum + parseFloat(this.fileInputAsJSON[i].weight);
                     }
-                    this.avgWeight = sum/this.fileInputAsJSON.length;
+                    this.avgWeight = sum / this.fileInputAsJSON.length;
                 };
                 reader.readAsText(this.csvFile);
                 ctx = 0;
@@ -118,9 +232,9 @@
             },
 
             //
-            getSample(count) {
+            getSample() {
                 let idx, element;
-                for (let i = 0, limit = this.entities.length; i < count; i++) {
+                for (let i = 0, limit = this.entities.length; i < this.quantity; i++) {
                     //console.log(limit);
                     //Math.floor return the biggest integer which is bigger or equals the given number (round off!)
                     //random ziehen. nummer wird in idx gespeichert und das random element in element
@@ -147,7 +261,7 @@
                     header: {'Content-Type': 'application/json'},
                     body: JSON.stringify({entities: this.rand})
                 };
-                 await fetch(urlConcept, optionsConcept)
+                await fetch(urlConcept, optionsConcept)
                 //.then(res => res.json())
                     .then(json => console.log('Success: ', json))
                     .catch(error => console.error('Error: ', error));
@@ -161,7 +275,7 @@
                 };
 
                 await fetch(urlConnections, optionsConnections)
-                    //.then(res => res.json())
+                //.then(res => res.json())
                     .then(json => console.log('Success: ', json))
                     .catch(error => console.error('Error: ', error));
 
