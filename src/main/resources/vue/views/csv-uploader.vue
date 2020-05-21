@@ -5,17 +5,15 @@
             <p>Rate the relationship between two concepts from your sample. You
                 have to rate the relationship between one and ten, with one being the lowest and ten the highest.</p>
             <p>The value indicates how many comparisons you want to have per test. Based on our research, a user needs
-            about 40 seconds for a test with eight comparisons.</p>
+                about 40 seconds for a test with eight comparisons.</p>
         </b-popover>
         <b-popover target="SpatText" triggers="hover" placement="topleft">
             <template v-slot:title>Spatial Comparison Test</template>
-            <p>comparison of several concepts in space. You can position the terms with drag and drop. The further the nodes are, the less they have to do with each other.</p>
-            <p>You can specify the number of tests and how many terms they contain.Based on our research, we recommend six tests with five concepts each.</p>
+            <p>comparison of several concepts in space. You can position the terms with drag and drop. The further the
+                nodes are, the less they have to do with each other.</p>
+            <p>You can specify the number of tests and how many terms they contain.Based on our research, we recommend
+                six tests with five concepts each.</p>
         </b-popover>
-
-        <b-form-invalid-feedback id="quantity-feedback">Number must be greater than 2.</b-form-invalid-feedback>
-        <b-form-invalid-feedback id="number-of-pair-feedback">Number must be greater than 1 and not more than the half quantity.</b-form-invalid-feedback>
-        <b-form-invalid-feedback id="number-of-spat-feedback">Applied to spatial tests and their nodes: number of tests times nodes per test must be less than or equal to quantity.</b-form-invalid-feedback>
 
         <!-- accept only .csv other files can be added -->
         <b-row class="mt-3 text-center" align-h="center">
@@ -30,16 +28,10 @@
                         v-model="csvFile"
                         :state="Boolean(csvFile)"
                         accept=".csv"
+                        @input="csvInfo"
                         placeholder="Choose CSV-File or drop it here.."
                         drop-placeholder="Drop CSV-File here.."
                 ></b-form-file>
-            </b-col>
-        </b-row>
-
-        <b-row class="mt-3" align-h="center">
-            <b-col class="text-center" cols="3"><label>Sample quantity:</label></b-col>
-            <b-col cols="3">
-                <b-form-input aria-describedby="quantity-feedback" align-h="left" type="number" v-model="quantity" :state="quantityState" :min="2" step="1"></b-form-input>
             </b-col>
         </b-row>
 
@@ -53,6 +45,22 @@
                 <div class="mt-3 text-center">
                     <label>Average weight: {{ avgWeight ? avgWeight : 0 }}</label>
                 </div>
+            </b-col>
+        </b-row>
+
+        <b-row class="mt-3" align-h="center">
+            <b-col class="text-center" cols="3"><label>Sample quantity:</label></b-col>
+            <b-col cols="3">
+                <b-form-input :disabled="!Boolean(csvFile)"
+                              aria-describedby="quantity-feedback"
+                              align-h="left"
+                              type="number"
+                              v-model="quantity"
+                              :state="quantityState"
+                              :min="2"
+                              step="1">
+                </b-form-input>
+                <b-form-invalid-feedback id="quantity-feedback">Please choose a file first. Number must be at least 2 or at most the size of the entities.</b-form-invalid-feedback>
             </b-col>
         </b-row>
 
@@ -82,18 +90,48 @@
             <b-col cols="3">
                 <div class="mt-3">
                     <p>Number of pair comparisons:</p>
-                    <b-form-input v-bind:disabled="status_comp === 'comp_not_accepted'" align-h="left" required
-                                  type="number" :state="numberOfCompsState" v-model="number_of_comparisons" aria-describedby="number-of-pair-feedback" :min="1" step="1"></b-form-input>
+                    <b-form-input :disabled="status_comp === 'comp_not_accepted'"
+                                  align-h="left"
+                                  required
+                                  type="number"
+                                  :state="numberOfCompsState"
+                                  v-model="number_of_comparisons"
+                                  aria-describedby="number-of-pair-feedback"
+                                  :min="1"
+                                  step="1">
+                    </b-form-input>
+                    <b-form-invalid-feedback id="number-of-pair-feedback">Number must be greater than 1 and not more than the half
+                        quantity.
+                    </b-form-invalid-feedback>
                 </div>
             </b-col>
             <b-col cols="3">
                 <div>
                     <p class="mt-3">Number of spatial tests:</p>
-                    <b-form-input class="mt-3" v-bind:disabled="status_spat === 'spat_not_accepted'" align-h="left"
-                                  type="number" :state="numberOfTestsState" v-model="number_of_tests" aria-describedby="number-of-spat-feedback" :min="1" step="1"></b-form-input>
+                    <b-form-input class="mt-3"
+                                  :disabled="status_spat === 'spat_not_accepted'"
+                                  align-h="left"
+                                  type="number"
+                                  :state="numberOfTestsState"
+                                  v-model="number_of_tests"
+                                  aria-describedby="number-of-spat-feedback"
+                                  :min="1"
+                                  step="1">
+                    </b-form-input>
                     <p class="mt-3">Number of nodes per test:</p>
-                    <b-form-input class="mt-3" v-bind:disabled="status_spat === 'spat_not_accepted'" align-h="left"
-                                  type="number" :state="numberOfTestsState" v-model="nodes_per_test" aria-describedby="number-of-spat-feedback" :min="2" step="1"></b-form-input>
+                    <b-form-input class="mt-3"
+                                  :disabled="status_spat === 'spat_not_accepted'"
+                                  align-h="left"
+                                  type="number"
+                                  :state="numberOfTestsState"
+                                  v-model="nodes_per_test"
+                                  aria-describedby="number-of-spat-feedback"
+                                  :min="2"
+                                  step="1">
+                    </b-form-input>
+                    <b-form-invalid-feedback id="number-of-spat-feedback">Applied to spatial tests and their nodes: number of tests
+                        times nodes per test must be less than or equal to quantity. tests*nodes <= quantity
+                    </b-form-invalid-feedback>
                 </div>
             </b-col>
         </b-row>
@@ -102,11 +140,8 @@
             <b-col cols="3">
                 <b-button block @click="clearFiles()" variant="primary">Clear</b-button>
             </b-col>
-            <b-col v-if="infoFlag" cols="3">
-                <b-button block @click="csvInfo()" variant="primary">Info</b-button>
-            </b-col>
-            <b-col v-else cols="3">
-                <b-button block @click="csvSubmit()" variant="primary">Submit</b-button>
+            <b-col cols="3">
+                <b-button :disabled="((status_comp === 'comp_not_accepted') && (status_spat === 'spat_not_accepted')) || (numberOfCompsState === false) || (quantityState === false) || (numberOfTestsState === false)" block @click="csvSubmit()" variant="primary">Submit</b-button>
             </b-col>
         </b-row>
     </div>
@@ -125,14 +160,13 @@
                 sample: [],
                 rand: [],
                 avgWeight: 0,
-                infoFlag: true,
                 limit: 0,
 
                 //test customization
                 quantity: 2,
                 status_comp: 'comp_not_accepted',
                 status_spat: 'spat_not_accepted',
-                number_of_comparisons: 2,
+                number_of_comparisons: 1,
                 number_of_tests: 1,
                 nodes_per_test: 2
 
@@ -147,7 +181,7 @@
                 return this.quantity >= 2 && this.quantity <= this.entities.length
             },
             numberOfTestsState() {
-                return this.number_of_tests*this.nodes_per_test <= this.quantity
+                return this.number_of_tests * this.nodes_per_test <= this.quantity
             }
         },
 
@@ -159,10 +193,16 @@
                 this.fileInput = '';
                 this.fileInputAsJSON = {};
                 this.entities = [];
-                //this.sample = [];
+                this.sample = [];
                 this.rand = [];
                 this.avgWeight = 0;
-                this.infoFlag = true;
+
+                this.quantity = 2;
+                this.status_comp = 'comp_not_accepted';
+                this.status_spat = 'spat_not_accepted';
+                this.number_of_comparisons = 1;
+                this.number_of_tests = 1;
+                this.nodes_per_test = 2;
             },
 
             /**
@@ -189,46 +229,33 @@
             },
 
             csvInfo() {
-                const reader = new FileReader();
-                let ctx = 0;
-                reader.onload = ev => {
-                    this.fileInput = ev.target.result;
-                    this.fileInputAsJSON = this.csvJSON(this.fileInput);
+                if(this.csvFile) {
+                    const reader = new FileReader();
+                    reader.onload = ev => {
+                        this.fileInput = ev.target.result;
+                        this.fileInputAsJSON = this.csvJSON(this.fileInput);
 
-                    //iterate over fileInputAsJSON and save entities..
-                    for (let i = 0; i < this.fileInputAsJSON.length; i++) {
-                        if (!this.entities.includes(this.fileInputAsJSON[i].target))
-                            this.entities.push(this.fileInputAsJSON[i].target);
-                        if (!this.entities.includes(this.fileInputAsJSON[i].source))
-                            this.entities.push(this.fileInputAsJSON[i].source);
-                    }
-                    //filters NaN, null, not defined and ''
-                    this.entities = this.entities.filter(el => {
-                        return el
-                    });
-                    //random sample
-                    this.getSample();
-
-                    //filter the matching random entities with the connections from the csv
-                    for (let i = 0; i < this.fileInputAsJSON.length; i++) {
-                        if (this.rand.includes(this.fileInputAsJSON[i].target) && this.rand.includes(this.fileInputAsJSON[i].source)) {
-                            this.sample.push(this.fileInputAsJSON[i]);
-                            ctx++;
+                        //iterate over fileInputAsJSON and save entities..
+                        for (let i = 0; i < this.fileInputAsJSON.length; i++) {
+                            if (!this.entities.includes(this.fileInputAsJSON[i].target))
+                                this.entities.push(this.fileInputAsJSON[i].target);
+                            if (!this.entities.includes(this.fileInputAsJSON[i].source))
+                                this.entities.push(this.fileInputAsJSON[i].source);
                         }
-                    }
+                        //filters NaN, null, not defined and ''
+                        this.entities = this.entities.filter(el => {
+                            return el
+                        });
 
-                    //calculate the average weight of the CSV file
-                    let sum = 0;
-                    for (let i = 0; i < this.fileInputAsJSON.length; i++) {
-                        sum = sum + parseFloat(this.fileInputAsJSON[i].weight);
-                    }
-                    this.avgWeight = sum / this.fileInputAsJSON.length;
-                };
-                reader.readAsText(this.csvFile);
-                ctx = 0;
-                this.infoFlag = false;
-                console.log(this.rand);
-                console.log(this.sample)
+                        //calculate the average weight of the CSV file
+                        let sum = 0;
+                        for (let i = 0; i < this.fileInputAsJSON.length; i++) {
+                            sum = sum + parseFloat(this.fileInputAsJSON[i].weight);
+                        }
+                        this.avgWeight = sum / this.fileInputAsJSON.length;
+                    };
+                    reader.readAsText(this.csvFile);
+                }
             },
 
             //
@@ -254,6 +281,18 @@
 
             //csvSubmit as asynchronous fetch connections wait for the concepts
             async csvSubmit() {
+                let ctx = 0;
+                this.getSample();
+
+                //filter the matching random entities with the connections from the csv
+                for (let i = 0; i < this.fileInputAsJSON.length; i++) {
+                    if (this.rand.includes(this.fileInputAsJSON[i].target) && this.rand.includes(this.fileInputAsJSON[i].source)) {
+                        this.sample.push(this.fileInputAsJSON[i]);
+                        ctx++;
+                    }
+                }
+                ctx = 0;
+
                 //send the entities to the server
                 let urlConcept = "api/fillconcept";
                 let optionsConcept = {
@@ -279,7 +318,6 @@
                     .then(json => console.log('Success: ', json))
                     .catch(error => console.error('Error: ', error));
 
-                this.infoFlag = true;
                 this.clearFiles();
             }
         }
