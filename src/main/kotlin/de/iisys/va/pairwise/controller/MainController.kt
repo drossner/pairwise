@@ -6,7 +6,9 @@ import de.iisys.va.pairwise.GLOB
 import de.iisys.va.pairwise.domain.pair.ComparsionSession
 import de.iisys.va.pairwise.domain.Concept
 import de.iisys.va.pairwise.domain.Connections
+import de.iisys.va.pairwise.domain.Settings
 import de.iisys.va.pairwise.domain.pair.ConceptComparison
+import de.iisys.va.pairwise.domain.query.QSettings
 import de.iisys.va.pairwise.javalinvueextensions.componentwithProps
 import de.iisys.va.pairwise.json.ComparisonResponse
 import de.iisys.va.pairwise.json.Connection
@@ -30,6 +32,17 @@ object MainController {
         //comparision session is set up
         if(finished) ctx.redirect("${GLOB.BASE_PATH}/");
         else componentwithProps("poll-view").handle(ctx)
+    }
+
+    fun fillSettings(ctx: Context) {
+        if(QSettings().findCount() <= 0) {
+            Settings().let {
+                it.conceptsPerSpat = ctx.body<Settings>().conceptsPerSpat
+                it.maxSpats = ctx.body<Settings>().maxSpats
+                it.maxComps = ctx.body<Settings>().maxComps
+                DB.save(it)
+            }
+        }
     }
 
     fun fillConcept(ctx: Context) {

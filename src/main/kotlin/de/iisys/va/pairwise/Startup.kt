@@ -12,8 +12,6 @@ import io.javalin.Javalin
 import io.javalin.core.security.Role
 import io.javalin.http.Context
 import io.javalin.http.Handler
-import io.javalin.http.UnauthorizedResponse
-import io.javalin.http.staticfiles.Location
 import io.javalin.plugin.rendering.vue.JavalinVue
 import io.javalin.plugin.rendering.vue.VueComponent
 import java.util.*
@@ -35,7 +33,6 @@ fun main() {
             .enableWebjars()
             .addStaticFiles("/vue/assets")
         config.accessManager{ a, b, c -> accessManager(a,b,c)}
-
     }
         .start(7000)
     //JavalinVue.rootDirectory("/vue", Location.CLASSPATH)
@@ -88,8 +85,9 @@ fun main() {
     app.post("/api/spatial/next", SpatialController::updateSession)
     app.post("/api/next", MainController::updateCompSesssion)
     app.post("/api/login", AdminController::validate)
-    app.post("api/fillconcept", MainController::fillConcept)
-    app.post("api/fillconnections", MainController::fillConnections)
+    app.post("/api/fillconcept", MainController::fillConcept)
+    app.post("/api/fillconnections", MainController::fillConnections)
+    app.post("api/fillsettings", MainController::fillSettings)
 
     app.get("/api/spatial/simulationdata", SimulationController::getSimulationData)
 

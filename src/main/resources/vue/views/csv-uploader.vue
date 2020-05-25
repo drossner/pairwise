@@ -278,9 +278,9 @@
                 }
             },
 
-
             //csvSubmit as asynchronous fetch connections wait for the concepts
             async csvSubmit() {
+
                 let ctx = 0;
                 this.getSample();
 
@@ -301,7 +301,6 @@
                     body: JSON.stringify({entities: this.rand})
                 };
                 await fetch(urlConcept, optionsConcept)
-                //.then(res => res.json())
                     .then(json => console.log('Success: ', json))
                     .catch(error => console.error('Error: ', error));
 
@@ -312,9 +311,22 @@
                     header: {'Content-Type': 'application/json'},
                     body: JSON.stringify(this.sample)
                 };
-
                 await fetch(urlConnections, optionsConnections)
-                //.then(res => res.json())
+                    .then(json => console.log('Success: ', json))
+                    .catch(error => console.error('Error: ', error));
+
+                //send the customized settings
+                let urlSettings = "api/fillsettings";
+                let optionsSettings = {
+                    method: 'POST',
+                    header: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        maxComps: this.number_of_comparisons,
+                        maxSpats: this.number_of_tests,
+                        conceptsPerSpat: this.nodes_per_test
+                    })
+                };
+                fetch(urlSettings, optionsSettings)
                     .then(json => console.log('Success: ', json))
                     .catch(error => console.error('Error: ', error));
 
