@@ -1,74 +1,36 @@
 package de.iisys.va.pairwise.controller
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import de.iisys.va.pairwise.GLOB
 import de.iisys.va.pairwise.domain.pair.ComparsionSession
 import de.iisys.va.pairwise.domain.Concept
-import de.iisys.va.pairwise.domain.Connections
-import de.iisys.va.pairwise.domain.Settings
 import de.iisys.va.pairwise.domain.pair.ConceptComparison
-import de.iisys.va.pairwise.domain.query.QSettings
 import de.iisys.va.pairwise.javalinvueextensions.componentwithProps
 import de.iisys.va.pairwise.json.ComparisonResponse
-import de.iisys.va.pairwise.json.Connection
-import de.iisys.va.pairwise.json.Entities
 import de.iisys.va.pairwise.json.Poll
 import io.ebean.DB
 import io.javalin.http.BadRequestResponse
 import io.javalin.http.Context
 import io.javalin.http.NotFoundResponse
-import io.javalin.plugin.json.JavalinJackson
-import java.util.*
 
 object MainController {
 
-    val concept = DB.find(Concept::class.java).findList()
+    fun checkDatabase(ctx: Context) {
+        //val flag = DB.find(Concept::class.java).findList().size <= 0
+        ctx.json(DB.find(Concept::class.java).findList().size <= 0)
+    }
 
     fun default(ctx: Context){
         val init = ctx.sessionAttribute<Boolean>("init") ?: false
         val finished = ctx.sessionAttribute<Boolean>("finished") ?: false
         if(init.not()) initSession(ctx) //no running poll for this client yet
         //comparision session is set up
-        if(finished) ctx.redirect("${GLOB.BASE_PATH}/");
+        if(finished) ctx.redirect("${GLOB.BASE_PATH}/")
         else componentwithProps("poll-view").handle(ctx)
     }
 
-    fun fillSettings(ctx: Context) {
-        if(QSettings().findCount() <= 0) {
-            Settings().let {
-                it.conceptsPerSpat = ctx.body<Settings>().conceptsPerSpat
-                it.maxSpats = ctx.body<Settings>().maxSpats
-                it.maxComps = ctx.body<Settings>().maxComps
-                DB.save(it)
-            }
-        }
-    }
-
-    fun fillConcept(ctx: Context) {
-        val entities = ctx.body<Entities>().entities
-        val conceptList:MutableList<Concept> = LinkedList()
-        for (entity in entities) conceptList.add(Concept().also { it.name = entity })
-        DB.saveAll(conceptList)
-    }
-
-    fun fillConnections(ctx: Context) {
-        val conceptMap = DB.find(Concept::class.java).findList().map { it.name to it }.toMap()
-        val mapper = JavalinJackson.getObjectMapper()
-        val connectionsList: MutableList<Connection> = mapper.readValue(ctx.body())
-        val connectionsListDB: MutableList<Connections> = LinkedList()
-
-        for (connection in connectionsList) {
-            connectionsListDB.add(Connections(conceptMap[connection.source], conceptMap[connection.target]).also {
-                it.weight = connection.weight
-                it.sum = connection.sum
-            })
-        }
-        //connectionsListDB.forEach { println(it) }
-        DB.saveAll(connectionsListDB)
-    }
-
     private fun initSession(ctx: Context) {
+        val concept = DB.find(Concept::class.java).findList()
+
         //set up domain objects
         val comparsionSession = ComparsionSession()
         val endIndex = minOf(Conf.get().maxComps * 2, concept.size)

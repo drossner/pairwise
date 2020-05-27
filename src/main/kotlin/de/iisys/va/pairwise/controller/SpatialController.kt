@@ -17,8 +17,6 @@ import java.util.*
 
 object SpatialController {
 
-    val concept = DB.find(Concept::class.java).findList()
-
     fun default(ctx: Context){
         val init = ctx.sessionAttribute<Boolean>("initSpatial")?: false
         if(init.not()) initSesstion(ctx)
@@ -26,6 +24,8 @@ object SpatialController {
     }
 
     private fun initSesstion(ctx: Context) {
+        val concept = DB.find(Concept::class.java).findList()
+
         var plannedComps = Conf.get().maxSpats
         var neededConcepts = plannedComps * Conf.get().conceptsPerSpat
         if(concept.size < neededConcepts){
@@ -86,5 +86,4 @@ object SpatialController {
     private fun getSpatSession(ctx: Context): SpatialSession{
         return ctx.sessionAttribute<SpatialSession>("spatialSession")?: throw BadRequestResponse("No session init")
     }
-
 }

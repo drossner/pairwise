@@ -71,6 +71,7 @@
                 .then(res => res.json())
                 .then(json => {
                     this.poll = json;
+                    console.log(json);
                     this.timeStamp = performance.now();
                     this.ready = true;
                 });

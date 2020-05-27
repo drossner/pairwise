@@ -53,7 +53,7 @@ fun main() {
     app.get("/testpoll", SpatialController::default)
     app.get("/admin", VueComponent("admin-view"))
     app.get("/simulation", VueComponent("simulation-view"))
-    app.get("/uploadfile", VueComponent("csv-uploader"))
+    app.get("/admin/uploadfile", VueComponent("csv-uploader"))
     app.get("/about", Handler { it.result("Noch nichts") })
     app.get("/invalidate", Handler { ctx ->
         ctx.req.getSession().invalidate()
@@ -81,13 +81,14 @@ fun main() {
     app.get("/api/poll", MainController::getPoll)
 
     app.get("/api/spatial/concepts", SpatialController::getConcepts)
+    app.get("/api/checkdatabase", MainController::checkDatabase)
 
     app.post("/api/spatial/next", SpatialController::updateSession)
     app.post("/api/next", MainController::updateCompSesssion)
     app.post("/api/login", AdminController::validate)
-    app.post("/api/fillconcept", MainController::fillConcept)
-    app.post("/api/fillconnections", MainController::fillConnections)
-    app.post("api/fillsettings", MainController::fillSettings)
+    app.post("/api/fillconcept", AdminController::fillConcept)
+    app.post("/api/fillconnections", AdminController::fillConnections)
+    app.post("/api/fillsettings", AdminController::fillSettings)
 
     app.get("/api/spatial/simulationdata", SimulationController::getSimulationData)
 

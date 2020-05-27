@@ -53,7 +53,7 @@
                 fetch(url, options)
                     .then(res => res.json())
                     .then(json => {
-                        console.log(json);
+                        //console.log(json);
                         //wenn true auf hauptseite zurück
                         //wenn false roter rand oder text
                         if (json === true) {
@@ -78,7 +78,7 @@
             <b-navbar-nav>
                 <b-button v-b-modal.help-modal size="sm" class="my-2 my-sm-0" variant="outline-secondary">Help</b-button>
                 <b-button v-b-modal.login-modal size="sm" class="my-2 my-sm-0 m-2" v-if="showLogin" variant="outline-secondary">Login</b-button>
-                <b-button size="sm" class="my-2 my-sm-0 m-2" variant="outline-secondary" v-if="this.$javalin.state.isAdmin" href="uploadfile">Upload File</b-button>
+                <!--<b-button size="sm" class="my-2 my-sm-0 m-2" variant="outline-secondary" v-if="this.$javalin.state.isAdmin" href="admin/uploadfile">Upload File</b-button>-->
             </b-navbar-nav>
             <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
             <b-collapse id="nav-collapse" is-nav>

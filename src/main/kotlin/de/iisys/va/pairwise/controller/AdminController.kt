@@ -1,7 +1,12 @@
 package de.iisys.va.pairwise.controller
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import de.iisys.va.pairwise.domain.Concept
+import de.iisys.va.pairwise.domain.Connections
+import de.iisys.va.pairwise.domain.Settings
 import de.iisys.va.pairwise.domain.pair.query.QComparsionSession
+import de.iisys.va.pairwise.domain.query.QConcept
+import de.iisys.va.pairwise.domain.query.QSettings
 import de.iisys.va.pairwise.domain.spatial.SpatialComparison
 import de.iisys.va.pairwise.domain.spatial.query.QSpatialSession
 import de.iisys.va.pairwise.json.*
@@ -9,17 +14,47 @@ import io.ebean.DB
 import io.javalin.http.BadRequestResponse
 import io.javalin.http.Context
 import io.javalin.http.NotFoundResponse
-import io.javalin.plugin.openapi.dsl.nonRefTypes
+import io.javalin.plugin.json.JavalinJackson
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.collections.HashMap
-import kotlin.math.max
-import kotlin.math.min
-import kotlin.math.sqrt
 
 object AdminController {
 
     private val formattedDate = SimpleDateFormat("yyyy-MM-dd HH:mm:ss z", Locale.ENGLISH)
+
+    fun fillSettings(ctx: Context) {
+        if(QSettings().findCount() <= 0) {
+            Settings().let {
+                it.conceptsPerSpat = ctx.body<Settings>().conceptsPerSpat
+                it.maxSpats = ctx.body<Settings>().maxSpats
+                it.maxComps = ctx.body<Settings>().maxComps
+                DB.save(it)
+            }
+        }
+    }
+
+    fun fillConcept(ctx: Context) {
+        if(QConcept().findCount() > 0) return
+        val entities = ctx.body<Entities>().entities
+        val conceptList:MutableList<Concept> = LinkedList()
+        for (entity in entities) conceptList.add(Concept().also { it.name = entity })
+        DB.saveAll(conceptList)
+    }
+
+    fun fillConnections(ctx: Context) {
+        val conceptMap = DB.find(Concept::class.java).findList().map { it.name to it }.toMap()
+        val mapper = JavalinJackson.getObjectMapper()
+        val connectionsList: MutableList<Connection> = mapper.readValue(ctx.body())
+        val connectionsListDB: MutableList<Connections> = LinkedList()
+
+        for (connection in connectionsList) {
+            connectionsListDB.add(Connections(conceptMap[connection.source], conceptMap[connection.target]).also {
+                it.weight = connection.weight
+                it.sum = connection.sum
+            })
+        }
+        DB.saveAll(connectionsListDB)
+    }
 
     fun getCompSessions(ctx: Context){
         //val sessions = QSpatialSession().orderBy().created.desc()

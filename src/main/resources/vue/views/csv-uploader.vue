@@ -315,16 +315,36 @@
                     .then(json => console.log('Success: ', json))
                     .catch(error => console.error('Error: ', error));
 
+
+                let body = {};
+                if(this.status_spat === 'spat_not_accepted'){
+                    body = JSON.stringify({
+                        maxComps : this.number_of_comparisons,
+                        conceptsPerSpat:  0,
+                        maxSpats: 0
+                    })
+                }
+                else if(this.status_comp === 'comp_not_accepted'){
+                    body = JSON.stringify({
+                        maxComps : 0,
+                        conceptsPerSpat:  this.nodes_per_test,
+                        maxSpats: this.number_of_tests
+                    })
+                }
+                else {
+                    body = JSON.stringify({
+                        maxComps : this.number_of_comparisons,
+                        conceptsPerSpat:  this.nodes_per_test,
+                        maxSpats: this.number_of_tests
+                    })
+                }
+
                 //send the customized settings
                 let urlSettings = "api/fillsettings";
                 let optionsSettings = {
                     method: 'POST',
                     header: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
-                        maxComps: this.number_of_comparisons,
-                        maxSpats: this.number_of_tests,
-                        conceptsPerSpat: this.nodes_per_test
-                    })
+                    body: body
                 };
                 fetch(urlSettings, optionsSettings)
                     .then(json => console.log('Success: ', json))
