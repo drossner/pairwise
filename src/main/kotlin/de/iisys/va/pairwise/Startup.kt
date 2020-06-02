@@ -44,7 +44,8 @@ fun main() {
             "spatId" to it.sessionAttribute<SpatialSession>("spatialSession")?.sessionId.toString(),
             "initSpat" to it.sessionAttribute<Boolean>("initSpat"),
             "finishedSpat" to it.sessionAttribute<Boolean>("finishedSpat"),
-            "isAdmin" to it.sessionAttribute<Boolean>("isAdmin")
+            "isAdmin" to it.sessionAttribute<Boolean>("isAdmin"),
+            "fileUploaded" to it.sessionAttribute("fileUploaded", false)
         )
     }
 
@@ -86,6 +87,7 @@ fun main() {
     app.post("/api/spatial/next", SpatialController::updateSession)
     app.post("/api/next", MainController::updateCompSesssion)
     app.post("/api/login", AdminController::validate)
+    app.get("api/logout", AdminController::logout)
     app.post("/api/fillconcept", AdminController::fillConcept)
     app.post("/api/fillconnections", AdminController::fillConnections)
     app.post("/api/fillsettings", AdminController::fillSettings)

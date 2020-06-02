@@ -3,8 +3,8 @@ import io.ebean.dbmigration.DbMigration
 
 fun main() {
 
-    System.setProperty("ddl.migration.version", "1.4")
-    System.setProperty("ddl.migration.name", "add Connections entity")
+    System.setProperty("ddl.migration.version", "1.5")
+    System.setProperty("ddl.migration.name", "add poll state to settings")
 
     val dbmig = DbMigration.create()
     dbmig.setPlatform(Platform.POSTGRES)

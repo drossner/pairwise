@@ -321,21 +321,27 @@
                     body = JSON.stringify({
                         maxComps : this.number_of_comparisons,
                         conceptsPerSpat:  0,
-                        maxSpats: 0
+                        maxSpats: 0,
+                        status_spat: this.status_spat,
+                        status_comp: this.status_comp
                     })
                 }
                 else if(this.status_comp === 'comp_not_accepted'){
                     body = JSON.stringify({
                         maxComps : 0,
                         conceptsPerSpat:  this.nodes_per_test,
-                        maxSpats: this.number_of_tests
+                        maxSpats: this.number_of_tests,
+                        status_spat: this.status_spat,
+                        status_comp: this.status_comp
                     })
                 }
                 else {
                     body = JSON.stringify({
                         maxComps : this.number_of_comparisons,
                         conceptsPerSpat:  this.nodes_per_test,
-                        maxSpats: this.number_of_tests
+                        maxSpats: this.number_of_tests,
+                        statusSpat: this.status_spat,
+                        statusComp: this.status_comp
                     })
                 }
 

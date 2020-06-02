@@ -6,12 +6,14 @@
             </div>
         </div>
         <div v-if="this.dbIsEmpty">
-            <p>No entries in database found. Please login and upload a .csv-file to fill the database with entities.</p>
+            <p>{{emptyDatabase}}</p>
         </div>
         <div class="row mt-2" v-if="this.$javalin.state.isAdmin">
             <div class="col col-12">
-                <p>Click here for the file upload and the poll customization.</p>
-                <b-button variant="outline-primary" size="lg" block href="admin/uploadfile">Upload File</b-button>
+                <p>{{fileUpload}}</p>
+                <b-button variant="outline-primary" size="lg" block :disabled="uploadBtn.disabled" :href="uploadBtn.url">
+                    {{uploadBtn.text}}
+                </b-button>
             </div>
         </div>
         <div v-if="!(this.dbIsEmpty)">
@@ -53,10 +55,25 @@
         data: function () {
             return {
                 welcomeText: "",
-                dbIsEmpty: true
+                fileUpload: "",
+                emptyDatabase: "",
+                dbIsEmpty: true,
             }
         },
         computed: {
+            uploadBtn: function () {
+                let text = "Upload File";
+                let url = "admin/uploadfile";
+                let state = this.$javalin.state;
+                let disabled = false;
+                if (!state.fileUploaded) {
+                    text = "successfully filled the Database";
+                    url = ".";
+                    disabled = true;
+                }
+                return{text: text, url: url, disabled: disabled};
+            },
+
             compBtn: function () {
                 let text = "Start Poll";
                 let url = "poll";
@@ -96,6 +113,14 @@
             fetch("api/consts?key=welcomeText")
                 .then(res => res.json())
                 .then(res => this.welcomeText = res.welcomeText);
+
+            fetch("api/consts?key=fileUpload")
+                .then(res => res.json())
+                .then(res => this.fileUpload = res.fileUpload);
+
+            fetch("api/consts?key=emptyDatabase")
+                .then(res => res.json())
+                .then(res => this.emptyDatabase = res.emptyDatabase);
 
             fetch("api/checkdatabase")
                 .then(res => res.json())

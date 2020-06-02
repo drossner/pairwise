@@ -15,7 +15,9 @@ import io.javalin.http.NotFoundResponse
 object MainController {
 
     fun checkDatabase(ctx: Context) {
-        //val flag = DB.find(Concept::class.java).findList().size <= 0
+        if (DB.find(Concept::class.java).findList().size > 0)
+            ctx.sessionAttribute("fileUploaded", true)
+
         ctx.json(DB.find(Concept::class.java).findList().size <= 0)
     }
 

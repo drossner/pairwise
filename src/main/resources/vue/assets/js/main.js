@@ -10,7 +10,7 @@ var vm = new Vue({
         interval: null,
         showLogin: true
     },
-    created () {
+    created() {
         fetch("api/consts")
             .then(res => res.json())
             .then(json => {
@@ -35,9 +35,9 @@ var vm = new Vue({
         },
         isAdminFunc: function () {
             this.showLogin = !this.$javalin.state.isAdmin;
-    },
-    beforeDestroy() {
-        clearInterval(this.interval)
-    }
+        },
+        beforeDestroy() {
+            clearInterval(this.interval)
+        }
     }
 });

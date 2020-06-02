@@ -1,5 +1,7 @@
 {
   "impress": "https://www.hof-university.de/impressum.html",
   "privacy": "https://www.hof-university.de/datenschutz.html",
-  "welcomeText": "This poll helps us to understand the relationship between concepts. An average poll lasts approx. 5 minutes. If you are not sure what to do, press the HELP button in the upper navigation bar. Thank you very much."
+  "welcomeText": "This poll helps us to understand the relationship between concepts. An average poll lasts approx. 5 minutes. If you are not sure what to do, press the HELP button in the upper navigation bar. Thank you very much.",
+  "fileUpload": "Click here for the file upload and the poll customization.",
+  "emptyDatabase": "No entries in database found. Please login and upload a .csv-file to fill the database with entities."
 }

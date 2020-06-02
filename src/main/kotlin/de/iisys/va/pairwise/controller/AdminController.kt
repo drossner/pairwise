@@ -28,6 +28,8 @@ object AdminController {
                 it.conceptsPerSpat = ctx.body<Settings>().conceptsPerSpat
                 it.maxSpats = ctx.body<Settings>().maxSpats
                 it.maxComps = ctx.body<Settings>().maxComps
+                it.statusComp = ctx.body<Settings>().statusComp
+                it.statusSpat = ctx.body<Settings>().statusSpat
                 DB.save(it)
             }
         }
@@ -37,7 +39,10 @@ object AdminController {
         if(QConcept().findCount() > 0) return
         val entities = ctx.body<Entities>().entities
         val conceptList:MutableList<Concept> = LinkedList()
-        for (entity in entities) conceptList.add(Concept().also { it.name = entity })
+        for (entity in entities)
+            conceptList.add(Concept().also {
+                it.name = entity
+            })
         DB.saveAll(conceptList)
     }
 
@@ -160,6 +165,11 @@ object AdminController {
             ctx.sessionAttribute("isAdmin", true)
             ctx.sessionAttribute("auth", true)
         }
+    }
+
+    fun logout(ctx: Context) {
+        ctx.sessionAttribute("isAdmin", false)
+        ctx.sessionAttribute("auth", false)
     }
 
     //no real delete, change the deleteFlag from selected sessions to true
