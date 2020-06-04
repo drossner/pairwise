@@ -3,6 +3,7 @@ package de.iisys.va.pairwise.controller
 import de.iisys.va.pairwise.GLOB
 import de.iisys.va.pairwise.domain.pair.ComparsionSession
 import de.iisys.va.pairwise.domain.Concept
+import de.iisys.va.pairwise.domain.Settings
 import de.iisys.va.pairwise.domain.pair.ConceptComparison
 import de.iisys.va.pairwise.javalinvueextensions.componentwithProps
 import de.iisys.va.pairwise.json.ComparisonResponse
@@ -13,6 +14,11 @@ import io.javalin.http.Context
 import io.javalin.http.NotFoundResponse
 
 object MainController {
+
+    fun getPollStates(ctx: Context) {
+        val settings = DB.find(Settings::class.java).findList()
+        ctx.json(settings)
+    }
 
     fun checkDatabase(ctx: Context) {
         if (DB.find(Concept::class.java).findList().size > 0)

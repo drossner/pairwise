@@ -83,6 +83,7 @@ fun main() {
 
     app.get("/api/spatial/concepts", SpatialController::getConcepts)
     app.get("/api/checkdatabase", MainController::checkDatabase)
+    app.get("/api/getstates", MainController::getPollStates)
 
     app.post("/api/spatial/next", SpatialController::updateSession)
     app.post("/api/next", MainController::updateCompSesssion)
@@ -99,6 +100,7 @@ fun main() {
     app.get("/admin/api/getspatialsessions", AdminController::getSpatialSessions)
     app.get("/admin/api/spatsession/:sessionId", AdminController::getSpatialComp)
     app.get("/admin/api/spatsession/:sessionId/finishedcomps", AdminController::getSpatFinished)
+    //app.get("/api/getstates", MainController::getPollStates)
 
     app.post("/admin/api/protected/delete", AdminController::delete)
 

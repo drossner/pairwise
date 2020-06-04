@@ -23,7 +23,7 @@ object AdminController {
     private val formattedDate = SimpleDateFormat("yyyy-MM-dd HH:mm:ss z", Locale.ENGLISH)
 
     fun fillSettings(ctx: Context) {
-        if(QSettings().findCount() <= 0) {
+        if (QSettings().findCount() <= 0) {
             Settings().let {
                 it.conceptsPerSpat = ctx.body<Settings>().conceptsPerSpat
                 it.maxSpats = ctx.body<Settings>().maxSpats
@@ -36,9 +36,9 @@ object AdminController {
     }
 
     fun fillConcept(ctx: Context) {
-        if(QConcept().findCount() > 0) return
+        if (QConcept().findCount() > 0) return
         val entities = ctx.body<Entities>().entities
-        val conceptList:MutableList<Concept> = LinkedList()
+        val conceptList: MutableList<Concept> = LinkedList()
         for (entity in entities)
             conceptList.add(Concept().also {
                 it.name = entity
@@ -61,14 +61,14 @@ object AdminController {
         DB.saveAll(connectionsListDB)
     }
 
-    fun getCompSessions(ctx: Context){
+    fun getCompSessions(ctx: Context) {
         //val sessions = QSpatialSession().orderBy().created.desc()
         val sessions = QComparsionSession().orderBy().created.desc().findList().filter { !it.deleteFlag }
         val transferList = LinkedList<CompOverviewItem>(
             sessions.map { session ->
                 val avgDur = session.comparisons.map { it.duration }.average()
                 val avgRat = session.comparisons.map { it.rating }.average()
-                val finished = session.comparisons.stream().mapToInt {it.rating}.anyMatch { it <= 0 }.not()
+                val finished = session.comparisons.stream().mapToInt { it.rating }.anyMatch { it <= 0 }.not()
                 CompOverviewItem(
                     session.sessionId.toString(), formattedDate.format(session.created!!),
                     session.comparisons.size, avgRat, avgDur, finished
@@ -78,10 +78,10 @@ object AdminController {
         ctx.json(transferList)
     }
 
-    fun getCompSession(ctx: Context){
+    fun getCompSession(ctx: Context) {
         val session = QComparsionSession()
             .sessionId
-            .equalTo(UUID.fromString(ctx.pathParam("sessionId"))).findOne()?: throw NotFoundResponse()
+            .equalTo(UUID.fromString(ctx.pathParam("sessionId"))).findOne() ?: throw NotFoundResponse()
         val comps = LinkedList<ConceptComparison>(
             session.comparisons.map { comp ->
                 ConceptComparison(comp.conceptA!!.name!!, comp.conceptB!!.name!!, comp.rating, comp.duration)
@@ -91,22 +91,27 @@ object AdminController {
         ctx.json(transfer)
     }
 
-    fun getSpatialSessions(ctx: Context){
+    fun getSpatialSessions(ctx: Context) {
         val sessions = QSpatialSession().orderBy().created.desc().findList().filter { !it.deleteFlag }
-        val transList = LinkedList(
-            sessions.map {
-                SpatialOverviewItem(
-                    it.sessionId.toString(), formattedDate.format(it.created!!),
-                    it.comparisons.first().concepts.size, it.comparisons.size,
-                    it.comparisons.map { comp -> comp.duration }.average(),
-                    it.comparisons.any { comp -> comp.duration == 0L }.not()
-                )
-            }
-        )
-        ctx.json(transList)
+        if(sessions.isEmpty()){
+            ctx.json({})
+        }
+        else {
+            val transList = LinkedList(
+                sessions.map {
+                    SpatialOverviewItem(
+                        it.sessionId.toString(), formattedDate.format(it.created!!),
+                        it.comparisons.first().concepts.size, it.comparisons.size,
+                        it.comparisons.map { comp -> comp.duration }.average(),
+                        it.comparisons.any { comp -> comp.duration == 0L }.not()
+                    )
+                }
+            )
+            ctx.json(transList)
+        }
     }
 
-    fun getSpatialComp(ctx: Context){
+    fun getSpatialComp(ctx: Context) {
         //val comp = QSpatialComparison()
         //    .fetch("created")
         //    .session.sessionId
@@ -114,27 +119,29 @@ object AdminController {
         //    .findOne()?: throw NotFoundResponse()
         val session = QSpatialSession()
             .sessionId.equalTo(UUID.fromString(ctx.pathParam("sessionId")))
-            .findOne()?: throw NotFoundResponse()
+            .findOne() ?: throw NotFoundResponse()
         val qstNr = ctx.queryParam<Int>("qstNr").get()
 
-        val comp = if((qstNr in session.comparisons.indices))
+        val comp = if ((qstNr in session.comparisons.indices))
             session.comparisons[qstNr]
         else throw BadRequestResponse()
         ctx.json(
-            SpatialItem(comp.id,
+            SpatialItem(
+                comp.id,
                 comp.konvaResult,
                 comp.duration,
-                comp.clicksPerConcept.toIntArray())
+                comp.clicksPerConcept.toIntArray()
+            )
         )
     }
 
-    fun getSpatFinished(ctx: Context){
+    fun getSpatFinished(ctx: Context) {
         val session = QSpatialSession()
             .sessionId.equalTo(UUID.fromString(ctx.pathParam("sessionId")))
-            .findOne()?: throw NotFoundResponse()
+            .findOne() ?: throw NotFoundResponse()
         val tmp = TreeMap<Int, SpatialComparison>()
         session.comparisons.forEachIndexed { i, comp ->
-            if(comp.duration > 0) tmp.put(i, comp)
+            if (comp.duration > 0) tmp.put(i, comp)
         }
         val res = LinkedList<SpatialSubOverviewItem>()
 
@@ -144,7 +151,7 @@ object AdminController {
         ctx.json(res)
     }
 
-    fun getCompletedPolls(ctx: Context){
+    fun getCompletedPolls(ctx: Context) {
         val spatCount = QSpatialSession().comparisons.duration.gt(0).findList().map { session ->
             session.comparisons.all { it.duration > 0 }
         }.count { it }
@@ -152,7 +159,7 @@ object AdminController {
             session.comparisons.all { it.duration > 0 }
         }.count { it }
 
-        ctx.json(mapOf("completedPoll" to spatCount+compCount))
+        ctx.json(mapOf("completedPoll" to spatCount + compCount))
     }
 
     fun validate(ctx: Context) {
@@ -174,7 +181,7 @@ object AdminController {
 
     //no real delete, change the deleteFlag from selected sessions to true
     //in other place all sessions with deleteFlag = false are displayed
-    fun delete(ctx: Context){
+    fun delete(ctx: Context) {
         val comps = QComparsionSession().findList()
         val spat = QSpatialSession().findList()
         val resultComp = ctx.body<CheckedItems>().resultComp

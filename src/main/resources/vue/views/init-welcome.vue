@@ -17,16 +17,16 @@
             </div>
         </div>
         <div v-if="!(this.dbIsEmpty)">
-            <div class="row mt-2">
+            <p class="mt-2">{{welcomeText}}</p>
+            <div class="row mt-2" v-if="(this.statusComp === 'comp_accepted')">
                 <div class="col col-12">
-                    <p>{{welcomeText}}</p>
                     <b-button variant="outline-primary" size="lg" block :disabled="compBtn.disabled"
                               :href="compBtn.url">
                         {{compBtn.text}}
                     </b-button>
                 </div>
             </div>
-            <div class="row mt-2">
+            <div class="row mt-2" v-if="(this.statusSpat === 'spat_accepted')">
                 <div class="col col-12">
                     <b-button variant="outline-primary" size="lg" block :disabled="spatBtn.disabled"
                               :href="spatBtn.url">
@@ -58,6 +58,9 @@
                 fileUpload: "",
                 emptyDatabase: "",
                 dbIsEmpty: true,
+                statusComp: "",
+                statusSpat: ""
+
             }
         },
         computed: {
@@ -124,7 +127,16 @@
 
             fetch("api/checkdatabase")
                 .then(res => res.json())
-                .then(res => this.dbIsEmpty = res)
+                .then(res => this.dbIsEmpty = res);
+
+            fetch("api/getstates")
+                .then(res => res.json())
+                .then(res => {
+                    if (res.length > 0) {
+                        this.statusComp = res[0].statusComp;
+                        this.statusSpat = res[0].statusSpat;
+                    }
+                })
         }
     });
 </script>

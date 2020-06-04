@@ -301,7 +301,7 @@
                     body: JSON.stringify({entities: this.rand})
                 };
                 await fetch(urlConcept, optionsConcept)
-                    .then(json => console.log('Success: ', json))
+                    //.then(json => console.log('Success: ', json))
                     .catch(error => console.error('Error: ', error));
 
                 //send the connections to the server
@@ -312,7 +312,7 @@
                     body: JSON.stringify(this.sample)
                 };
                 await fetch(urlConnections, optionsConnections)
-                    .then(json => console.log('Success: ', json))
+                    //.then(json => console.log('Success: ', json))
                     .catch(error => console.error('Error: ', error));
 
 
@@ -322,8 +322,8 @@
                         maxComps : this.number_of_comparisons,
                         conceptsPerSpat:  0,
                         maxSpats: 0,
-                        status_spat: this.status_spat,
-                        status_comp: this.status_comp
+                        statusSpat: this.status_spat,
+                        statusComp: this.status_comp
                     })
                 }
                 else if(this.status_comp === 'comp_not_accepted'){
@@ -331,8 +331,8 @@
                         maxComps : 0,
                         conceptsPerSpat:  this.nodes_per_test,
                         maxSpats: this.number_of_tests,
-                        status_spat: this.status_spat,
-                        status_comp: this.status_comp
+                        statusSpat: this.status_spat,
+                        statusComp: this.status_comp
                     })
                 }
                 else {
@@ -352,8 +352,8 @@
                     header: {'Content-Type': 'application/json'},
                     body: body
                 };
-                fetch(urlSettings, optionsSettings)
-                    .then(json => console.log('Success: ', json))
+                await fetch(urlSettings, optionsSettings)
+                    //.then(json => console.log('Success: ', json))
                     .catch(error => console.error('Error: ', error));
 
                 this.clearFiles();
