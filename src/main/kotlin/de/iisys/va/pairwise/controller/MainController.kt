@@ -79,6 +79,8 @@ object MainController {
         comp.rating = request.rating
         comp.qstNr = qstNr
         DB.update(comp)
+        val statusSpat = DB.find(Settings::class.java).findList()[0].statusSpat
+        if(statusSpat == "spat_not_accepted") ctx.sessionAttribute("finishedSpat", true)
         if(qstNr + 1 >= compSession.comparisons.size){
             ctx.sessionAttribute("finished", true)
         }

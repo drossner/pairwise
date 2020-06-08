@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<migration xmlns="http://ebean-orm.github.io/xml/ns/dbmigration">
+    <changeSet type="apply">
+        <createTable name="spatial_node_tracked" pkName="pk_spatial_node_tracked">
+            <column name="id" type="bigint" primaryKey="true"/>
+            <column name="spatial_comparison_id" type="bigint" notnull="true" references="spatial_comparison.id" foreignKeyName="fk_spatial_node_tracked_spatial_comparison_id" foreignKeyIndex="ix_spatial_node_tracked_spatial_comparison_id"/>
+            <column name="name" type="varchar" notnull="true"/>
+            <column name="x" type="double" notnull="true"/>
+            <column name="y" type="double" notnull="true"/>
+        </createTable>
+    </changeSet>
+</migration>

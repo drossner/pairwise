@@ -5,9 +5,11 @@ import de.iisys.va.pairwise.controller.AdminController
 import de.iisys.va.pairwise.controller.MainController
 import de.iisys.va.pairwise.controller.SimulationController
 import de.iisys.va.pairwise.controller.SpatialController
+import de.iisys.va.pairwise.domain.Settings
 import de.iisys.va.pairwise.domain.pair.ComparsionSession
 import de.iisys.va.pairwise.domain.spatial.SpatialSession
 import de.iisys.va.pairwise.javalinvueextensions.componentwithProps
+import io.ebean.DB
 import io.javalin.Javalin
 import io.javalin.core.security.Role
 import io.javalin.http.Context
@@ -65,11 +67,13 @@ fun main() {
         componentwithProps("comparison-review", mapOf("sessionid" to it.pathParam("sessionId"))).handle(it)
     })
     app.get("/admin/spat/:sessionId", Handler {
+
         componentwithProps("spatial-review",
             mapOf(
                 "sessionid" to it.pathParam("sessionId"),
                 "qstnr" to it.queryParam("qstNr").orEmpty(),
-                "maxnr" to 3.toString() //todo: dynamically loaded in js!
+                "maxnr" to DB.find(Settings::class.java).findList()[0].maxSpats.minus(1).toString()
+                //"maxnr" to 3.toString() //todo: dynamically loaded in js!
             )
         ).handle(it)
     })

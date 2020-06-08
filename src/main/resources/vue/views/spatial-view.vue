@@ -13,7 +13,8 @@
                 stage: null,
                 concepts: [],
                 timeStamp: 0,
-                clicksPerConcept: []
+                clicksPerConcept: [],
+                tracked: []
             }
         },
         mounted(){
@@ -66,6 +67,13 @@
                     nodes[i] = this.createNode(concepts[i], 40+i*4, 40+i*3);
                     nodes[i].on('mousedown touchstart', function(){
                         self.clicksPerConcept[i]++;
+                    });
+                    nodes[i].on('mouseup touchend', function () {
+                        self.tracked.push({
+                            name: concepts[i],
+                            x: nodes[i]._lastPos.x,
+                            y: nodes[i]._lastPos.y
+                        });
                     });
                     this.concepts[i].konvaNode = nodes[i];
                 }
@@ -167,6 +175,8 @@
                 return group.getChildren()[0].size();
             },
             sendToServer: function () {
+
+                //console.log(this.tracked);
                 const container = this.$refs.canvasContainer;
                 let dimY = container.offsetHeight;
                 let dimX = container.offsetWidth;
@@ -178,6 +188,7 @@
                 }
                 let duration = performance.now() - this.timeStamp;
                 this.timeStamp = 0;
+                console.log(this.tracked);
                 console.log(this.clicksPerConcept);
                 fetch("api/spatial/next", {
                     method: 'POST',
@@ -188,14 +199,17 @@
                         scale: scale,
                         konvaJson: konvaJson,
                         positions: poss,
-                        clicksPerConcept: this.clicksPerConcept
+                        clicksPerConcept: this.clicksPerConcept,
+                        tracked: this.tracked
                     })
                 })
-                    .then(res => res.json())
+                    .then(res =>
+                        res.json())
                     .then(json => {
                         if (json.moreData === false) location.href = '.';
                         else location.reload();
-                    });
+                    })
+                    .catch(err => console.log("error:", err));
             }
         }
     });

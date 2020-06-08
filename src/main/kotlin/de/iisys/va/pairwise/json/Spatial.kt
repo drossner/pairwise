@@ -1,5 +1,7 @@
 package de.iisys.va.pairwise.json
 
+import de.iisys.va.pairwise.domain.spatial.SpatialNodeTracked
+
 data class SpatialResponse(
     val dimX: Int,
     val dimY: Int,
@@ -7,7 +9,8 @@ data class SpatialResponse(
     val scale: Double,
     val konvaJson: String,
     val positions: MutableList<Pos>,
-    val clicksPerConcept: MutableList<Int>
+    val clicksPerConcept: MutableList<Int>,
+    val tracked: MutableList<SpatialNodeTracked>
 )
 
 data class Pos(
