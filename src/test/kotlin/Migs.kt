@@ -4,8 +4,8 @@ import io.ebean.dbmigration.DbMigration
 fun main() {
 
     //if you create a new initial sql and xml file use version .0 and change name to "initial"
-    System.setProperty("ddl.migration.version", "1.7")
-    System.setProperty("ddl.migration.name", "add timestamps")
+    System.setProperty("ddl.migration.version", "1.8")
+    System.setProperty("ddl.migration.name", "add old node position")
 
     val dbmig = DbMigration.create()
     dbmig.setPlatform(Platform.POSTGRES)

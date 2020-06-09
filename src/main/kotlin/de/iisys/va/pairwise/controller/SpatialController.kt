@@ -65,7 +65,7 @@ object SpatialController {
                     SpatialPos(x = pos.x, y = pos.y)
                 })
                 sc.tracked.addAll(data.tracked.map { t ->
-                    SpatialNodeTracked(name = t.name, x = t.x, y = t.y, dragStart = t.dragStart, dragStop = t.dragStop)
+                    SpatialNodeTracked(name = t.name, x = t.x, y = t.y, dragStart = t.dragStart, dragStop = t.dragStop, oldX = t.oldX, oldY = t.oldY)
                 })
                 sc.konvaResult = EJson.parseObject(data.konvaJson)
                 sc.scale = data.scale

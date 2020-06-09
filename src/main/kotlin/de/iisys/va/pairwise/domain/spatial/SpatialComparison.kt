@@ -34,4 +34,11 @@ class SpatialComparison: BaseComparison() {
 data class SpatialPos(@Id val id: Long = 0, var x: Double, var y: Double)
 
 @Entity
-data class SpatialNodeTracked(@Id val id: Long = 0, var name: String, var x: Double, var y: Double, var dragStart: Long? = 0, var dragStop: Long? = 0)
+data class SpatialNodeTracked(@Id val id: Long = 0,
+                              var name: String,
+                              var x: Double,
+                              var y: Double,
+                              var dragStart: Long? = 0,
+                              var dragStop: Long? = 0,
+                              var oldX: Double?,
+                              var oldY: Double?)

@@ -242,12 +242,12 @@
                             if (!this.entities.includes(this.fileInputAsJSON[i].source))
                                 this.entities.push(this.fileInputAsJSON[i].source);
                         }
+
                         //filters NaN, null, not defined and ''
                         this.entities = this.entities.filter(el => {
                             return el
                         });
-                        this.entities.sort();
-                        console.log(this.entities);
+
                         //calculate the average weight of the CSV file
                         let sum = 0;
                         for (let i = 0; i < this.fileInputAsJSON.length; i++) {
