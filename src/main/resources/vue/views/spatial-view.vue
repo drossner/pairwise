@@ -14,7 +14,9 @@
                 concepts: [],
                 timeStamp: 0,
                 clicksPerConcept: [],
-                tracked: []
+                tracked: [],
+                dragStart: 0,
+                dragStop: 0
             }
         },
         mounted(){
@@ -67,12 +69,15 @@
                     nodes[i] = this.createNode(concepts[i], 40+i*4, 40+i*3);
                     nodes[i].on('mousedown touchstart', function(){
                         self.clicksPerConcept[i]++;
+                        self.dragStart = performance.now()
                     });
                     nodes[i].on('mouseup touchend', function () {
                         self.tracked.push({
                             name: concepts[i],
                             x: nodes[i]._lastPos.x,
-                            y: nodes[i]._lastPos.y
+                            y: nodes[i]._lastPos.y,
+                            dragStart: self.dragStart,
+                            dragStop: performance.now()
                         });
                     });
                     this.concepts[i].konvaNode = nodes[i];
@@ -188,8 +193,8 @@
                 }
                 let duration = performance.now() - this.timeStamp;
                 this.timeStamp = 0;
-                console.log(this.tracked);
-                console.log(this.clicksPerConcept);
+                //console.log(this.tracked);
+                //console.log(this.clicksPerConcept);
                 fetch("api/spatial/next", {
                     method: 'POST',
                     body: JSON.stringify({
@@ -203,8 +208,7 @@
                         tracked: this.tracked
                     })
                 })
-                    .then(res =>
-                        res.json())
+                    .then(res => res.json())
                     .then(json => {
                         if (json.moreData === false) location.href = '.';
                         else location.reload();
