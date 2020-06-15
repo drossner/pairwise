@@ -3,6 +3,7 @@ package de.iisys.va.pairwise.controller
 import de.iisys.va.pairwise.GLOB
 import de.iisys.va.pairwise.domain.pair.ComparsionSession
 import de.iisys.va.pairwise.domain.Concept
+import de.iisys.va.pairwise.domain.Settings
 import de.iisys.va.pairwise.domain.pair.ConceptComparison
 import de.iisys.va.pairwise.javalinvueextensions.componentwithProps
 import de.iisys.va.pairwise.json.ComparisonResponse
@@ -14,18 +15,30 @@ import io.javalin.http.NotFoundResponse
 
 object MainController {
 
-    val concept = DB.find(Concept::class.java).findList()
+    fun getPollStates(ctx: Context) {
+        val settings = DB.find(Settings::class.java).findList()
+        ctx.json(settings)
+    }
+
+    fun checkDatabase(ctx: Context) {
+        if (DB.find(Concept::class.java).findList().size > 0)
+            ctx.sessionAttribute("fileUploaded", true)
+
+        ctx.json(DB.find(Concept::class.java).findList().size <= 0)
+    }
 
     fun default(ctx: Context){
         val init = ctx.sessionAttribute<Boolean>("init") ?: false
         val finished = ctx.sessionAttribute<Boolean>("finished") ?: false
         if(init.not()) initSession(ctx) //no running poll for this client yet
         //comparision session is set up
-        if(finished) ctx.redirect("${GLOB.BASE_PATH}/");
+        if(finished) ctx.redirect("${GLOB.BASE_PATH}/")
         else componentwithProps("poll-view").handle(ctx)
     }
 
     private fun initSession(ctx: Context) {
+        val concept = DB.find(Concept::class.java).findList()
+
         //set up domain objects
         val comparsionSession = ComparsionSession()
         val endIndex = minOf(Conf.get().maxComps * 2, concept.size)
@@ -66,6 +79,8 @@ object MainController {
         comp.rating = request.rating
         comp.qstNr = qstNr
         DB.update(comp)
+        val statusSpat = DB.find(Settings::class.java).findList()[0].statusSpat
+        if(statusSpat == "spat_not_accepted") ctx.sessionAttribute("finishedSpat", true)
         if(qstNr + 1 >= compSession.comparisons.size){
             ctx.sessionAttribute("finished", true)
         }

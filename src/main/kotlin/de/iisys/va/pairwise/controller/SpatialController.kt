@@ -1,8 +1,10 @@
 package de.iisys.va.pairwise.controller
 
 import de.iisys.va.pairwise.domain.Concept
+import de.iisys.va.pairwise.domain.Settings
 import de.iisys.va.pairwise.domain.pair.ComparsionSession
 import de.iisys.va.pairwise.domain.spatial.SpatialComparison
+import de.iisys.va.pairwise.domain.spatial.SpatialNodeTracked
 import de.iisys.va.pairwise.domain.spatial.SpatialPos
 import de.iisys.va.pairwise.domain.spatial.SpatialSession
 import de.iisys.va.pairwise.javalinvueextensions.componentwithProps
@@ -17,8 +19,6 @@ import java.util.*
 
 object SpatialController {
 
-    val concept = DB.find(Concept::class.java).findList()
-
     fun default(ctx: Context){
         val init = ctx.sessionAttribute<Boolean>("initSpatial")?: false
         if(init.not()) initSesstion(ctx)
@@ -26,6 +26,8 @@ object SpatialController {
     }
 
     private fun initSesstion(ctx: Context) {
+        val concept = DB.find(Concept::class.java).findList()
+
         var plannedComps = Conf.get().maxSpats
         var neededConcepts = plannedComps * Conf.get().conceptsPerSpat
         if(concept.size < neededConcepts){
@@ -62,6 +64,9 @@ object SpatialController {
                 sc.positions.addAll(data.positions.map { pos ->
                     SpatialPos(x = pos.x, y = pos.y)
                 })
+                sc.tracked.addAll(data.tracked.map { t ->
+                    SpatialNodeTracked(name = t.name, x = t.x, y = t.y, dragStart = t.dragStart, dragStop = t.dragStop, oldX = t.oldX, oldY = t.oldY)
+                })
                 sc.konvaResult = EJson.parseObject(data.konvaJson)
                 sc.scale = data.scale
                 sc.clicksPerConcept.addAll(data.clicksPerConcept)
@@ -71,6 +76,8 @@ object SpatialController {
         DB.update(session)
         val finished = session.currQst >= session.comparisons.size
         ctx.json(mapOf("moreData" to finished.not()))
+        val statusComp = DB.find(Settings::class.java).findList()[0].statusComp
+        if(statusComp == "comp_not_accepted") ctx.sessionAttribute("finished", true)
         if(finished) ctx.sessionAttribute("finishedSpat", true)
     }
 
@@ -86,5 +93,4 @@ object SpatialController {
     private fun getSpatSession(ctx: Context): SpatialSession{
         return ctx.sessionAttribute<SpatialSession>("spatialSession")?: throw BadRequestResponse("No session init")
     }
-
 }

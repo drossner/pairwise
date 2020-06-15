@@ -8,10 +8,10 @@
                 </b-button>
             </b-button-group>
             <b-tabs content-class="mt-2" v-model="tabIndex" @input="onTabChanged">
-                <b-tab title="Comparison">
+                <b-tab v-if="(this.status_comp === 'comp_accepted')" title="Comparison">
                     <admin-comparison v-on:comp-loaded="loadCompletedComp($event)" ref="adminComparison"></admin-comparison>
                 </b-tab>
-                <b-tab title="Spatial">
+                <b-tab v-if="(this.status_spat === 'spat_accepted')" title="Spatial">
                     <admin-spatial v-on:spat-loaded="loadCompletedSpat($event)" ref="adminSpatial"></admin-spatial>
                 </b-tab>
             </b-tabs>
@@ -30,7 +30,9 @@
                 compItems: [],
                 spatItems: [],
                 completedCompSessions: [],
-                completedSpatSessions: []
+                completedSpatSessions: [],
+                status_comp: "",
+                status_spat: ""
             }
         },
         created() {
@@ -49,6 +51,15 @@
             else {
                 this.btnText = "Hide";
             }
+
+            fetch("api/getstates")
+                .then(res => res.json())
+                .then(res => {
+                    if (res.length > 0) {
+                        this.status_comp = res[0].statusComp;
+                        this.status_spat = res[0].statusSpat;
+                    }
+                });
         },
 
         methods: {

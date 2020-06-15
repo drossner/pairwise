@@ -13,7 +13,12 @@
                 stage: null,
                 concepts: [],
                 timeStamp: 0,
-                clicksPerConcept: []
+                clicksPerConcept: [],
+                tracked: [],
+                dragStart: 0,
+                dragStop: 0,
+                oldX: 0,
+                oldY: 0
             }
         },
         mounted(){
@@ -66,6 +71,20 @@
                     nodes[i] = this.createNode(concepts[i], 40+i*4, 40+i*3);
                     nodes[i].on('mousedown touchstart', function(){
                         self.clicksPerConcept[i]++;
+                        self.dragStart = performance.now();
+                        self.oldX = nodes[i].attrs.x;
+                        self.oldY = nodes[i].attrs.y;
+                    });
+                    nodes[i].on('mouseup touchend', function () {
+                        self.tracked.push({
+                            name: concepts[i],
+                            oldX: self.oldX,
+                            oldY: self.oldY,
+                            x: nodes[i].attrs.x,
+                            y: nodes[i].attrs.y,
+                            dragStart: self.dragStart,
+                            dragStop: performance.now()
+                        });
                     });
                     this.concepts[i].konvaNode = nodes[i];
                 }
@@ -178,7 +197,8 @@
                 }
                 let duration = performance.now() - this.timeStamp;
                 this.timeStamp = 0;
-                console.log(this.clicksPerConcept);
+                console.log(this.tracked);
+                //console.log(this.clicksPerConcept);
                 fetch("api/spatial/next", {
                     method: 'POST',
                     body: JSON.stringify({
@@ -188,14 +208,16 @@
                         scale: scale,
                         konvaJson: konvaJson,
                         positions: poss,
-                        clicksPerConcept: this.clicksPerConcept
+                        clicksPerConcept: this.clicksPerConcept,
+                        tracked: this.tracked
                     })
                 })
                     .then(res => res.json())
                     .then(json => {
                         if (json.moreData === false) location.href = '.';
                         else location.reload();
-                    });
+                    })
+                    .catch(err => console.log("error:", err));
             }
         }
     });

@@ -1,7 +1,10 @@
 package de.iisys.va.pairwise.json
 
+import de.iisys.va.pairwise.domain.Concept
+import de.iisys.va.pairwise.domain.Connections
 import de.iisys.va.pairwise.domain.spatial.SpatialComparison
 import java.sql.Timestamp
+import java.util.*
 
 data class CompOverviewItem(
     val id: String,
@@ -45,4 +48,16 @@ data class Password(
 data class CheckedItems(
     val resultComp: MutableList<String>,
     val resultSpat: MutableList<String>
+)
+
+data class Connection(
+    val source: String,
+    val target: String,
+    val sum: Int,
+    val weight: Float
+    //val sample: MutableList<Any>
+)
+
+data class Entities(
+        val entities: MutableList<String>
 )

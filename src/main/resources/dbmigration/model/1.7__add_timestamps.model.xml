@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<migration xmlns="http://ebean-orm.github.io/xml/ns/dbmigration">
+    <changeSet type="apply">
+        <addColumn tableName="spatial_node_tracked">
+            <column name="drag_start" type="bigint"/>
+            <column name="drag_stop" type="bigint"/>
+        </addColumn>
+    </changeSet>
+</migration>

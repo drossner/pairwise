@@ -5,15 +5,15 @@ import de.iisys.va.pairwise.controller.AdminController
 import de.iisys.va.pairwise.controller.MainController
 import de.iisys.va.pairwise.controller.SimulationController
 import de.iisys.va.pairwise.controller.SpatialController
+import de.iisys.va.pairwise.domain.Settings
 import de.iisys.va.pairwise.domain.pair.ComparsionSession
 import de.iisys.va.pairwise.domain.spatial.SpatialSession
 import de.iisys.va.pairwise.javalinvueextensions.componentwithProps
+import io.ebean.DB
 import io.javalin.Javalin
 import io.javalin.core.security.Role
 import io.javalin.http.Context
 import io.javalin.http.Handler
-import io.javalin.http.UnauthorizedResponse
-import io.javalin.http.staticfiles.Location
 import io.javalin.plugin.rendering.vue.JavalinVue
 import io.javalin.plugin.rendering.vue.VueComponent
 import java.util.*
@@ -35,7 +35,6 @@ fun main() {
             .enableWebjars()
             .addStaticFiles("/vue/assets")
         config.accessManager{ a, b, c -> accessManager(a,b,c)}
-
     }
         .start(7000)
     //JavalinVue.rootDirectory("/vue", Location.CLASSPATH)
@@ -47,7 +46,8 @@ fun main() {
             "spatId" to it.sessionAttribute<SpatialSession>("spatialSession")?.sessionId.toString(),
             "initSpat" to it.sessionAttribute<Boolean>("initSpat"),
             "finishedSpat" to it.sessionAttribute<Boolean>("finishedSpat"),
-            "isAdmin" to it.sessionAttribute<Boolean>("isAdmin")
+            "isAdmin" to it.sessionAttribute<Boolean>("isAdmin"),
+            "fileUploaded" to it.sessionAttribute("fileUploaded", false)
         )
     }
 
@@ -56,6 +56,7 @@ fun main() {
     app.get("/testpoll", SpatialController::default)
     app.get("/admin", VueComponent("admin-view"))
     app.get("/simulation", VueComponent("simulation-view"))
+    app.get("/admin/uploadfile", VueComponent("csv-uploader"))
     app.get("/about", Handler { it.result("Noch nichts") })
     app.get("/invalidate", Handler { ctx ->
         ctx.req.getSession().invalidate()
@@ -66,11 +67,13 @@ fun main() {
         componentwithProps("comparison-review", mapOf("sessionid" to it.pathParam("sessionId"))).handle(it)
     })
     app.get("/admin/spat/:sessionId", Handler {
+
         componentwithProps("spatial-review",
             mapOf(
                 "sessionid" to it.pathParam("sessionId"),
                 "qstnr" to it.queryParam("qstNr").orEmpty(),
-                "maxnr" to 3.toString() //todo: dynamically loaded in js!
+                "maxnr" to DB.find(Settings::class.java).findList()[0].maxSpats.minus(1).toString()
+                //"maxnr" to 3.toString() //todo: dynamically loaded in js!
             )
         ).handle(it)
     })
@@ -83,10 +86,16 @@ fun main() {
     app.get("/api/poll", MainController::getPoll)
 
     app.get("/api/spatial/concepts", SpatialController::getConcepts)
+    app.get("/api/checkdatabase", MainController::checkDatabase)
+    app.get("/api/getstates", MainController::getPollStates)
 
     app.post("/api/spatial/next", SpatialController::updateSession)
     app.post("/api/next", MainController::updateCompSesssion)
     app.post("/api/login", AdminController::validate)
+    app.get("api/logout", AdminController::logout)
+    app.post("/api/fillconcept", AdminController::fillConcept)
+    app.post("/api/fillconnections", AdminController::fillConnections)
+    app.post("/api/fillsettings", AdminController::fillSettings)
 
     app.get("/api/spatial/simulationdata", SimulationController::getSimulationData)
 
@@ -95,6 +104,7 @@ fun main() {
     app.get("/admin/api/getspatialsessions", AdminController::getSpatialSessions)
     app.get("/admin/api/spatsession/:sessionId", AdminController::getSpatialComp)
     app.get("/admin/api/spatsession/:sessionId/finishedcomps", AdminController::getSpatFinished)
+    //app.get("/api/getstates", MainController::getPollStates)
 
     app.post("/admin/api/protected/delete", AdminController::delete)
 
