@@ -38,6 +38,21 @@ var vm = new Vue({
         },
         beforeDestroy() {
             clearInterval(this.interval)
+        },
+        logout: function (valid, password) {
+            const url = "api/logout";
+            fetch(url)
+                .then(res => {
+                    console.log(res);
+                    return res.json()
+                })
+                .then(json => {
+                    console.log(json);
+                    if(json === true){
+                        valid = false;
+                        password = "";
+                    }
+                })
         }
     }
 });

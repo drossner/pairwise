@@ -357,7 +357,9 @@
                     //.then(json => console.log('Success: ', json))
                     .catch(error => console.error('Error: ', error));
 
+
                 this.clearFiles();
+                location.href = ".";
             }
         }
     });
