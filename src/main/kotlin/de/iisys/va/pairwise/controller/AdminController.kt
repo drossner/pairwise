@@ -50,6 +50,7 @@ object AdminController {
         val conceptMap = DB.find(Concept::class.java).findList().map { it.name to it }.toMap()
         val mapper = JavalinJackson.getObjectMapper()
         val connectionsList: MutableList<Connection> = mapper.readValue(ctx.body())
+        //val connectionsList = ctx.body<Connection>()
         val connectionsListDB: MutableList<Connections> = LinkedList()
 
         for (connection in connectionsList) {
