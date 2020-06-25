@@ -3,25 +3,23 @@ package de.iisys.va.pairwise.controller
 import de.iisys.va.pairwise.domain.Concept
 import de.iisys.va.pairwise.domain.Connections
 import de.iisys.va.pairwise.domain.Settings
-import de.iisys.va.pairwise.domain.pair.ComparsionSession
+import de.iisys.va.pairwise.domain.query.QSettings
 import de.iisys.va.pairwise.domain.spatial.SpatialComparison
 import de.iisys.va.pairwise.domain.spatial.SpatialNodeTracked
 import de.iisys.va.pairwise.domain.spatial.SpatialPos
 import de.iisys.va.pairwise.domain.spatial.SpatialSession
-import de.iisys.va.pairwise.javalinvueextensions.componentwithProps
 import de.iisys.va.pairwise.json.SpatialResponse
 import io.ebean.DB
 import io.ebean.text.json.EJson
 import io.javalin.http.BadRequestResponse
 import io.javalin.http.Context
-import io.javalin.http.NotFoundResponse
 import io.javalin.plugin.rendering.vue.VueComponent
+import org.postgresql.util.PSQLException
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
+import javax.persistence.PersistenceException
 
 object SpatialController {
-    //idx = 0
-    private val idx = AtomicInteger()
 
     fun default(ctx: Context) {
         val init = ctx.sessionAttribute<Boolean>("initSpatial") ?: false
@@ -29,47 +27,69 @@ object SpatialController {
         VueComponent("spatial-view").handle(ctx)
     }
 
-    private fun connectionsHelper(): MutableList<Concept?> {
+    private fun connectionsHelper(connectionsCopy: MutableList<Connections>): MutableList<Concept?> {
+
+        var idx = if (QSettings().findOne()!!.index == null) {
+            AtomicInteger()
+        } else {
+            AtomicInteger(QSettings().findOne()!!.index!!)
+        }
+
         val connections = DB.find(Connections::class.java).findList()
         val concepts: MutableList<Concept?> = LinkedList()
+        //to avoid index out of bound
+        if (idx.toInt() == connections.size) {
+            idx = AtomicInteger(0)
+        }
         concepts.add(connections[idx.toInt()].source)
         concepts.add(connections[idx.toInt()].target)
-        //var tempConcepts: MutableList<Concept?> = LinkedList()
-        val iterator = concepts.listIterator()
 
+
+        val iterator = concepts.listIterator()
+        val startConnection = connections[idx.toInt()]
         while (iterator.hasNext()) {
-            //println(iterator.next()?.name)
             val item = iterator.next()
-            for (connection in connections) {
+            for (connection in connectionsCopy) {
                 if (concepts.size >= Conf.get().conceptsPerSpat) {
-                    continue
+                    break
                 } else {
-                    if (connection == connections[idx.toInt()]) {
+                    if (connection == startConnection) {
                         continue
                     }
                     else {
                         if (item == connection.source) {
                             iterator.add(connection.target)
-                            continue
                         } else if (item == connection.target) {
                             iterator.add(connection.source)
-                            continue
                         }
                     }
                 }
             }
         }
+        idx.incrementAndGet()
 
-        //concepts.addAll(tempConcepts)
         concepts.map { println(it?.name) }
         println()
-        idx.incrementAndGet()
+
+        if (QSettings().findCount() >= 1) {
+            Conf.get().let {
+                it.index = idx.toInt()
+                try {
+                    DB.update(it)
+                } catch (ex: PersistenceException) {
+                    println((ex.cause as PSQLException).serverErrorMessage.detail)
+                }
+            }
+        }
+
         return concepts
     }
 
     private fun initSesstion(ctx: Context) {
         val concept = DB.find(Concept::class.java).findList()
-
+        val connections = DB.find(Connections::class.java).findList()
+        connections.shuffle()
+        connections.map { println(it.id) }
         var plannedComps = Conf.get().maxSpats
         var neededConcepts = plannedComps * Conf.get().conceptsPerSpat
         if (concept.size < neededConcepts) {
@@ -83,7 +103,7 @@ object SpatialController {
                 val startIndex = i * Conf.get().conceptsPerSpat
                 val endIndex = startIndex + Conf.get().conceptsPerSpat
                 //it.concepts.addAll(concepts.subList(startIndex, endIndex))
-                it.concepts.addAll(connectionsHelper() as Collection<Concept>)
+                it.concepts.addAll(connectionsHelper(connections) as Collection<Concept>)
                 it.session = session
             }
             session.comparisons.add(comp)

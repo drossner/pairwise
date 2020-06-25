@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<migration xmlns="http://ebean-orm.github.io/xml/ns/dbmigration">
-    <changeSet type="apply">
-        <createTable name="spatial_comparison_clicks_per_concept" pkName="pk_spatial_comparison_clicks_per_concept">
-            <column name="spatial_comparison_id" type="bigint" notnull="true" references="spatial_comparison.id" foreignKeyName="fk_spatial_comparison_clicks_per_concept_spatial_comparis_1" foreignKeyIndex="ix_spatial_comparison_clicks_per_concept_spatial_comparis_1"/>
-            <column name="value" type="integer" notnull="true"/>
-        </createTable>
-    </changeSet>
-</migration>
