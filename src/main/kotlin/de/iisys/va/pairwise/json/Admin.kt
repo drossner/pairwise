@@ -1,5 +1,7 @@
 package de.iisys.va.pairwise.json
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.fasterxml.jackson.annotation.JsonProperty
 import de.iisys.va.pairwise.domain.Concept
 import de.iisys.va.pairwise.domain.Connections
 import de.iisys.va.pairwise.domain.spatial.SpatialComparison
@@ -50,13 +52,13 @@ data class CheckedItems(
     val resultSpat: MutableList<String>
 )
 
-data class Connection(
-    val source: String,
-    val target: String,
-    val sum: Int,
-    val weight: Float
-    //val sample: MutableList<Any>
-)
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class Connection(val source: String,
+                      val target: String,
+                      val sum: Int,
+                      val weight: Float,
+                      @JsonProperty("AppearanceA") val appearancea: Int,
+                      @JsonProperty("AppearanceB") val appearanceb: Int)
 
 data class Entities(
         val entities: MutableList<String>

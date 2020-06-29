@@ -282,17 +282,17 @@
             //csvSubmit as asynchronous fetch connections wait for the concepts
             async csvSubmit() {
 
-                let ctx = 0;
+                //let ctx = 0;
                 this.getSample();
 
                 //filter the matching random entities with the connections from the csv
                 for (let i = 0; i < this.fileInputAsJSON.length; i++) {
                     if (this.rand.includes(this.fileInputAsJSON[i].target) && this.rand.includes(this.fileInputAsJSON[i].source)) {
                         this.sample.push(this.fileInputAsJSON[i]);
-                        ctx++;
+                        //ctx++;
                     }
                 }
-                ctx = 0;
+                //ctx = 0;
 
                 //send the entities to the server
                 let urlConcept = "api/fillconcept";
