@@ -28,7 +28,6 @@ object SpatialController {
     }
 
     private fun connectionsHelper(connectionsCopy: MutableList<Connections>): MutableList<Concept?> {
-
         var idx = if (QSettings().findOne()!!.index == null) {
             AtomicInteger()
         } else {
@@ -41,35 +40,57 @@ object SpatialController {
         if (idx.toInt() == connections.size) {
             idx = AtomicInteger(0)
         }
-        concepts.add(connections[idx.toInt()].source)
-        concepts.add(connections[idx.toInt()].target)
+        var startConnection = connections[idx.toInt()]
+        val oldStartConnection = startConnection
+        concepts.add(startConnection.source)
+        concepts.add(startConnection.target)
 
 
-        val iterator = concepts.listIterator()
-        val startConnection = connections[idx.toInt()]
-        while (iterator.hasNext()) {
-            val item = iterator.next()
-            for (connection in connectionsCopy) {
-                if (concepts.size >= Conf.get().conceptsPerSpat) {
-                    break
+        val sourceList: MutableList<Concept?> = LinkedList()
+        val targetList: MutableList<Concept?> = LinkedList()
+        connections.forEach {
+            sourceList.add(it.source)
+            targetList.add(it.target)
+        }
+
+        /*println("source: " + startConnection.source!!.name)
+        println("source in source list: " +  sourceList.count{it == startConnection.source})
+        println("source in target list: " +  targetList.count{it == startConnection.source})
+        println("target: " + startConnection.target!!.name)
+        println("target in source list: " +  sourceList.count{it == startConnection.target})
+        println("target in target list: " +  targetList.count{it == startConnection.target})
+        println()*/
+        if(((sourceList.count{it == startConnection.source} <= 1) && (targetList.count { it == startConnection.source } <= 1)) && ((sourceList.count { it == startConnection.target } <= 1) && (targetList.count { it == startConnection.target } <= 1))) {
+            //println("********************************* ich bin hier drin *********************************")
+            idx.incrementAndGet()
+            startConnection = connections[idx.toInt()]
+            concepts.add(startConnection.source)
+            concepts.add(startConnection.target)
+        }
+
+        for (connection in connectionsCopy) {
+            if (concepts.size >= Conf.get().conceptsPerSpat) {
+                break
+            } else {
+                if (connection == startConnection || connection == oldStartConnection) {
+                    continue
                 } else {
-                    if (connection == startConnection) {
-                        continue
+                    val temp = if (connection.source in concepts) {
+                        connection.target
+                    } else if (connection.target in concepts) {
+                        connection.source
                     }
-                    else {
-                        if (item == connection.source) {
-                            iterator.add(connection.target)
-                        } else if (item == connection.target) {
-                            iterator.add(connection.source)
-                        }
-                    }
+                    else null
+
+                    temp?.let { if (it !in concepts) concepts.add(it) }
                 }
             }
         }
+
         idx.incrementAndGet()
 
-        concepts.map { println(it?.name) }
-        println()
+        //concepts.map { println(it?.name) }
+        //println()
 
         if (QSettings().findCount() >= 1) {
             Conf.get().let {
@@ -89,7 +110,7 @@ object SpatialController {
         val concept = DB.find(Concept::class.java).findList()
         val connections = DB.find(Connections::class.java).findList()
         connections.shuffle()
-        connections.map { println(it.id) }
+        //connections.map { println(it.id) }
         var plannedComps = Conf.get().maxSpats
         var neededConcepts = plannedComps * Conf.get().conceptsPerSpat
         if (concept.size < neededConcepts) {
