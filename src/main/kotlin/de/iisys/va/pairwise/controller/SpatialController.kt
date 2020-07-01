@@ -35,6 +35,7 @@ object SpatialController {
         }
 
         val connections = DB.find(Connections::class.java).findList()
+        connectionsCopy.shuffle()
         val concepts: MutableList<Concept?> = LinkedList()
         //to avoid index out of bound
         if (idx.toInt() == connections.size) {
@@ -114,7 +115,7 @@ object SpatialController {
     private fun initSesstion(ctx: Context) {
         val concept = DB.find(Concept::class.java).findList()
         val connections = DB.find(Connections::class.java).findList()
-        connections.shuffle()
+        connections
         var plannedComps = Conf.get().maxSpats
         val neededConcepts = plannedComps * Conf.get().conceptsPerSpat
         if (concept.size < neededConcepts) {
