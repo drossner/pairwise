@@ -40,11 +40,10 @@ object SpatialController {
         if (idx.toInt() == connections.size) {
             idx = AtomicInteger(0)
         }
+
         var startConnection = connections[idx.toInt()]
-        val oldStartConnection = startConnection
         concepts.add(startConnection.source)
         concepts.add(startConnection.target)
-
 
         val sourceList: MutableList<Concept?> = LinkedList()
         val targetList: MutableList<Concept?> = LinkedList()
@@ -53,44 +52,50 @@ object SpatialController {
             targetList.add(it.target)
         }
 
-        /*println("source: " + startConnection.source!!.name)
-        println("source in source list: " +  sourceList.count{it == startConnection.source})
-        println("source in target list: " +  targetList.count{it == startConnection.source})
-        println("target: " + startConnection.target!!.name)
-        println("target in source list: " +  sourceList.count{it == startConnection.target})
-        println("target in target list: " +  targetList.count{it == startConnection.target})
-        println()*/
-        if(((sourceList.count{it == startConnection.source} <= 1) && (targetList.count { it == startConnection.source } <= 1)) && ((sourceList.count { it == startConnection.target } <= 1) && (targetList.count { it == startConnection.target } <= 1))) {
-            //println("********************************* ich bin hier drin *********************************")
-            idx.incrementAndGet()
-            startConnection = connections[idx.toInt()]
-            concepts.add(startConnection.source)
-            concepts.add(startConnection.target)
-        }
-
         for (connection in connectionsCopy) {
             if (concepts.size >= Conf.get().conceptsPerSpat) {
                 break
-            } else {
-                if (connection == startConnection || connection == oldStartConnection) {
+            }
+            else {
+                if (connection == startConnection) {
                     continue
                 } else {
-                    val temp = if (connection.source in concepts) {
-                        connection.target
-                    } else if (connection.target in concepts) {
-                        connection.source
-                    }
-                    else null
+                    var index = connectionsCopy.indexOf(startConnection)
+                    if (index == connectionsCopy.size-1)
+                        index = 0
 
-                    temp?.let { if (it !in concepts) concepts.add(it) }
+                    if (((sourceList.count { it == startConnection.source } <= 1) && (targetList.count { it == startConnection.source } == 0)) && ((sourceList.count { it == startConnection.target } == 0) && (targetList.count { it == startConnection.target } <= 1))) {
+                        index += 1
+                        startConnection = connectionsCopy[index]
+                        if (Conf.get().conceptsPerSpat - concepts.size == 1) {
+                            concepts.add(startConnection.source)
+                        } else {
+                            concepts.add(startConnection.source)
+                            concepts.add(startConnection.target)
+                        }
+                        sourceList.remove(startConnection.source)
+                        sourceList.remove(startConnection.target)
+                        targetList.remove(startConnection.source)
+                        targetList.remove(startConnection.target)
+                    } else {
+                        val temp = when {
+                            connection.source in concepts -> connection.target
+                            connection.target in concepts -> connection.source
+                            else -> null
+                        }
+                        temp?.let { if (it !in concepts) concepts.add(it) }
+                        sourceList.remove(startConnection.source)
+                        targetList.remove(startConnection.target)
+                        sourceList.remove(startConnection.target)
+                        targetList.remove(startConnection.source)
+                        index += 1
+                        startConnection = connectionsCopy[index]
+                    }
                 }
             }
         }
 
         idx.incrementAndGet()
-
-        //concepts.map { println(it?.name) }
-        //println()
 
         if (QSettings().findCount() >= 1) {
             Conf.get().let {
@@ -110,19 +115,18 @@ object SpatialController {
         val concept = DB.find(Concept::class.java).findList()
         val connections = DB.find(Connections::class.java).findList()
         connections.shuffle()
-        //connections.map { println(it.id) }
         var plannedComps = Conf.get().maxSpats
-        var neededConcepts = plannedComps * Conf.get().conceptsPerSpat
+        val neededConcepts = plannedComps * Conf.get().conceptsPerSpat
         if (concept.size < neededConcepts) {
             plannedComps = concept.size / Conf.get().conceptsPerSpat
-            neededConcepts = plannedComps * Conf.get().conceptsPerSpat
+            //neededConcepts = plannedComps * Conf.get().conceptsPerSpat
         }
-        val concepts = concept.shuffled().subList(0, neededConcepts)
+        //val concepts = concept.shuffled().subList(0, neededConcepts)
         val session = SpatialSession()
         for (i in 0 until plannedComps) {
             val comp = SpatialComparison().also {
-                val startIndex = i * Conf.get().conceptsPerSpat
-                val endIndex = startIndex + Conf.get().conceptsPerSpat
+                //val startIndex = i * Conf.get().conceptsPerSpat
+                //val endIndex = startIndex + Conf.get().conceptsPerSpat
                 //it.concepts.addAll(concepts.subList(startIndex, endIndex))
                 it.concepts.addAll(connectionsHelper(connections) as Collection<Concept>)
                 it.session = session
