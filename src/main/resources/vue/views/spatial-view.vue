@@ -2,6 +2,13 @@
     <div class="row spatial-row mt-2 position-relative">
         <div class="col col-12" id="canvasContainer" ref="canvasContainer"></div>
         <b-button @click="sendToServer" style="right: 0" class="position-absolute m-2 " variant="primary">Next</b-button>
+        <div class="col col-12 mt-2">
+            <b-progress variant="secondary" :max="maxSpats" height="30px">
+                <b-progress-bar :hidden="!ready" :value="currQst + 1">
+                    Progress: {{ currQst + 1 }} / {{ maxSpats }}
+                </b-progress-bar>
+            </b-progress>
+        </div>
     </div>
 </template>
 
@@ -18,7 +25,10 @@
                 dragStart: 0,
                 dragStop: 0,
                 oldX: 0,
-                oldY: 0
+                oldY: 0,
+                maxSpats: 0,
+                currQst: 0,
+                ready: false
             }
         },
         mounted(){
@@ -26,6 +36,17 @@
             this.resize();
         },
         created(){
+            fetch("api/getstates")
+                .then(res => res.json())
+                .then(json => {
+                    this.maxSpats = json[0].maxSpats;
+                });
+            fetch("api/spatial/currenttest")
+                .then(res => res.json())
+                .then(json => {
+                    this.currQst = json;
+                    console.log(this.currQst);
+                });
             window.addEventListener("resize", this.resize);
             fetch("api/spatial/concepts")
                 .then(res => res.json())
@@ -36,6 +57,7 @@
                     this.resize();
                     this.stage.draw();
                     this.timeStamp = performance.now();
+                    this.ready = true;
                 });
         },
         methods: {

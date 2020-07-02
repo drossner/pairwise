@@ -86,6 +86,7 @@ fun main() {
     app.get("/api/poll", MainController::getPoll)
 
     app.get("/api/spatial/concepts", SpatialController::getConcepts)
+    app.get("/api/spatial/currenttest", SpatialController::getCurrQst)
     app.get("/api/checkdatabase", MainController::checkDatabase)
     app.get("/api/getstates", MainController::getPollStates)
 
