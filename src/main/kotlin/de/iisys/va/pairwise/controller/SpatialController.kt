@@ -187,6 +187,13 @@ object SpatialController {
         }
     }
 
+    fun getCurrQst(ctx: Context) {
+        val session = getSpatSession(ctx)
+        println(session.currQst)
+        if (session.currQst > session.comparisons.size) throw BadRequestResponse()
+        else ctx.json(session.currQst)
+    }
+
     private fun getSpatSession(ctx: Context): SpatialSession {
         return ctx.sessionAttribute<SpatialSession>("spatialSession") ?: throw BadRequestResponse("No session init")
     }
