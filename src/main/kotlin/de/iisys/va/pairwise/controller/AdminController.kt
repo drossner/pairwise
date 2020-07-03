@@ -50,7 +50,7 @@ object AdminController {
         val conceptMap = DB.find(Concept::class.java).findList().map { it.name to it }.toMap()
         val mapper = JavalinJackson.getObjectMapper()
         val connectionsList: MutableList<Connection> = mapper.readValue(ctx.body())
-        //val connectionsList = ctx.body<Connection>()
+        connectionsList.shuffle()
         val connectionsListDB: MutableList<Connections> = LinkedList()
 
         for (connection in connectionsList) {
@@ -94,10 +94,9 @@ object AdminController {
 
     fun getSpatialSessions(ctx: Context) {
         val sessions = QSpatialSession().orderBy().created.desc().findList().filter { !it.deleteFlag }
-        if(sessions.isEmpty()){
+        if (sessions.isEmpty()) {
             ctx.json({})
-        }
-        else {
+        } else {
             val transList = LinkedList(
                 sessions.map {
                     SpatialOverviewItem(
@@ -183,6 +182,7 @@ object AdminController {
     //no real delete, change the deleteFlag from selected sessions to true
     //in other place all sessions with deleteFlag = false are displayed
     fun delete(ctx: Context) {
+        //val settings = DB.find(Settings::class.java).findList()
         val comps = QComparsionSession().findList()
         val spat = QSpatialSession().findList()
         val resultComp = ctx.body<CheckedItems>().resultComp
@@ -205,5 +205,6 @@ object AdminController {
                 }
             }
         }
+
     }
 }
