@@ -32,7 +32,8 @@
                 completedCompSessions: [],
                 completedSpatSessions: [],
                 status_comp: "",
-                status_spat: ""
+                status_spat: "",
+                options: {}
             }
         },
         created() {
@@ -109,48 +110,101 @@
 
             hideUncompleted() {
                 if (!JSON.parse(this.$cookies.get("hide-uncompleted"))) {
-                    this.$refs.adminComparison.items = this.completedCompSessions;
-                    this.$refs.adminSpatial.items = this.completedSpatSessions;
+                    if (this.status_spat === 'spat_accepted' && this.status_comp === 'comp_not_accepted') {
+                        this.$refs.adminSpatial.items = this.completedSpatSessions;
+                    } else if (this.status_comp === 'comp_accepted' && this.status_spat === 'spat_not_accepted') {
+                        this.$refs.adminComparison.items = this.completedCompSessions;
+                    } else {
+                        this.$refs.adminComparison.items = this.completedCompSessions;
+                        this.$refs.adminSpatial.items = this.completedSpatSessions;
+                    }
                     this.$cookies.set("hide-uncompleted", this.toggle);
                     this.btnText = "Show";
 
                 } else {
-                    this.$refs.adminComparison.items = this.compItems;
-                    this.$refs.adminSpatial.items = this.spatItems;
+                    if (this.status_spat === 'spat_accepted' && this.status_comp === 'comp_not_accepted') {
+                        this.$refs.adminSpatial.items = this.spatItems;
+                    } else if (this.status_comp === 'comp_accepted' && this.status_spat === 'spat_not_accepted') {
+                        this.$refs.adminComparison.items = this.compItems;
+                    } else {
+                        this.$refs.adminComparison.items = this.compItems;
+                        this.$refs.adminSpatial.items = this.spatItems;
+                    }
                     this.$cookies.set("hide-uncompleted", this.toggle);
                     this.btnText = "Hide";
                 }
             },
             deleteSessions() {
                 //array with selected item id's that should be removed
-                let selectedCompId = this.$refs.adminComparison.selectedCompId;
-                let selectedSpatId = this.$refs.adminSpatial.selectedSpatId;
+                if (this.status_spat === 'spat_accepted' && this.status_comp === 'comp_not_accepted') {
+                    let selectedSpatId = this.$refs.adminSpatial.selectedSpatId;
+                    this.$refs.adminSpatial.items = this.spatItems.filter(o1 => !selectedSpatId.some(o2 => o1.id === o2));
+                    this.spatItems = this.spatItems.filter(o1 => !selectedSpatId.some(o2 => o1.id === o2));
 
-                //filter for matching item ids and return the list with items without them
-                this.$refs.adminComparison.items = this.compItems.filter(o1 => !selectedCompId.some(o2 => o1.id === o2));
-                this.$refs.adminSpatial.items = this.spatItems.filter(o1 => !selectedSpatId.some(o2 => o1.id === o2));
-                this.compItems = this.compItems.filter(o1 => !selectedCompId.some(o2 => o1.id === o2));
-                this.spatItems = this.spatItems.filter(o1 => !selectedSpatId.some(o2 => o1.id === o2));
+                    this.options = {
+                        method: 'POST',
+                        header: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            resultComp: [],
+                            resultSpat: selectedSpatId
+                        })
+                    };
+                } else if (this.status_comp === 'comp_accepted' && this.status_spat === 'spat_not_accepted') {
+                    let selectedCompId = this.$refs.adminComparison.selectedCompId;
+                    this.$refs.adminComparison.items = this.compItems.filter(o1 => !selectedCompId.some(o2 => o1.id === o2));
+                    this.spatItems = this.spatItems.filter(o1 => !selectedSpatId.some(o2 => o1.id === o2));
+
+                    this.options = {
+                        method: 'POST',
+                        header: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            resultComp: selectedCompId,
+                            resultSpat: []
+                        })
+                    };
+                } else {
+                    let selectedCompId = this.$refs.adminComparison.selectedCompId;
+                    let selectedSpatId = this.$refs.adminSpatial.selectedSpatId;
+
+                    //filter for matching item ids and return the list with items without them
+                    this.$refs.adminComparison.items = this.compItems.filter(o1 => !selectedCompId.some(o2 => o1.id === o2));
+                    this.$refs.adminSpatial.items = this.spatItems.filter(o1 => !selectedSpatId.some(o2 => o1.id === o2));
+                    this.compItems = this.compItems.filter(o1 => !selectedCompId.some(o2 => o1.id === o2));
+                    this.spatItems = this.spatItems.filter(o1 => !selectedSpatId.some(o2 => o1.id === o2));
+
+                    this.options = {
+                        method: 'POST',
+                        header: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            resultComp: selectedCompId,
+                            resultSpat: selectedSpatId
+                        })
+                    };
+                }
 
                 //send arrays with items that should be removed
                 const url = "admin/api/protected/delete";
-                let options = {
-                    method: 'POST',
-                    header: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
-                        resultComp: selectedCompId,
-                        resultSpat: selectedSpatId
-                    })
-                };
-                fetch(url, options)
+                fetch(url, this.options)
                     .then(res => {
                         if (!res.ok) {
-                            this.$refs.adminComparison.selectedCompId = [];
-                            this.$refs.adminSpatial.selectedSpatId = [];
+                            if (this.status_spat === 'spat_accepted' && this.status_comp === 'comp_not_accepted') {
+                                this.$refs.adminSpatial.selectedSpatId = [];
+                            } else if (this.status_comp === 'comp_accepted' && this.status_spat === 'spat_not_accepted') {
+                                this.$refs.adminComparison.selectedCompId = [];
+                            } else {
+                                this.$refs.adminComparison.selectedCompId = [];
+                                this.$refs.adminSpatial.selectedSpatId = [];
+                            }
                             throw new Error("HTTP error " + res.status);
                         }
-                        this.$refs.adminComparison.selectedCompId = [];
-                        this.$refs.adminSpatial.selectedSpatId = [];
+                        if (this.status_spat === 'spat_accepted' && this.status_comp === 'comp_not_accepted') {
+                            this.$refs.adminSpatial.selectedSpatId = [];
+                        } else if (this.status_comp === 'comp_accepted' && this.status_spat === 'spat_not_accepted') {
+                            this.$refs.adminComparison.selectedCompId = [];
+                        } else {
+                            this.$refs.adminComparison.selectedCompId = [];
+                            this.$refs.adminSpatial.selectedSpatId = [];
+                        }
                         return res;
                     })
             }

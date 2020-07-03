@@ -189,7 +189,6 @@ object SpatialController {
 
     fun getCurrQst(ctx: Context) {
         val session = getSpatSession(ctx)
-        println(session.currQst)
         if (session.currQst > session.comparisons.size) throw BadRequestResponse()
         else ctx.json(session.currQst)
     }
