@@ -38,15 +38,12 @@
         created(){
             fetch("api/getstates")
                 .then(res => res.json())
-                .then(json => {
-                    this.maxSpats = json[0].maxSpats;
-                });
+                .then(json => this.maxSpats = json[0].maxSpats);
+
             fetch("api/spatial/currenttest")
                 .then(res => res.json())
-                .then(json => {
-                    this.currQst = json;
-                    console.log(this.currQst);
-                });
+                .then(json => this.currQst = json);
+
             window.addEventListener("resize", this.resize);
             fetch("api/spatial/concepts")
                 .then(res => res.json())
@@ -219,8 +216,6 @@
                 }
                 let duration = performance.now() - this.timeStamp;
                 this.timeStamp = 0;
-                console.log(this.tracked);
-                //console.log(this.clicksPerConcept);
                 fetch("api/spatial/next", {
                     method: 'POST',
                     body: JSON.stringify({
