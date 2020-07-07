@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<migration xmlns="http://ebean-orm.github.io/xml/ns/dbmigration">
+    <changeSet type="apply">
+        <createTable name="comparsion_session" identityType="external" pkName="pk_comparsion_session">
+            <column name="session_id" type="uuid" primaryKey="true" identity="true"/>
+            <column name="delete_flag" type="boolean" defaultValue="false" notnull="true"/>
+            <column name="created" type="timestamp" notnull="true"/>
+        </createTable>
+        <createTable name="concept" pkName="pk_concept">
+            <column name="id" type="bigint" primaryKey="true"/>
+            <column name="name" type="varchar"/>
+        </createTable>
+        <createTable name="concept_comparison" pkName="pk_concept_comparison">
+            <column name="id" type="bigint" primaryKey="true"/>
+            <column name="conceptA" type="bigint" notnull="true" references="concept.id" foreignKeyName="fk_concept_comparison_concepta" foreignKeyIndex="ix_concept_comparison_concepta"/>
+            <column name="conceptB" type="bigint" notnull="true" references="concept.id" foreignKeyName="fk_concept_comparison_conceptb" foreignKeyIndex="ix_concept_comparison_conceptb"/>
+            <column name="session_session_id" type="uuid" notnull="true" references="comparsion_session.session_id" foreignKeyName="fk_concept_comparison_session_session_id" foreignKeyIndex="ix_concept_comparison_session_session_id"/>
+            <column name="qst_nr" type="integer" notnull="true"/>
+            <column name="rating" type="integer" notnull="true"/>
+            <column name="duration" type="bigint" notnull="true"/>
+            <column name="created" type="timestamp" notnull="true"/>
+            <column name="modified" type="timestamp" notnull="true"/>
+        </createTable>
+        <createTable name="connections" pkName="pk_connections">
+            <column name="id" type="bigint" primaryKey="true"/>
+            <column name="sum" type="integer" notnull="true"/>
+            <column name="weight" type="float" notnull="true"/>
+            <column name="target_id" type="bigint" notnull="true" references="concept.id" foreignKeyName="fk_connections_target_id" foreignKeyIndex="ix_connections_target_id"/>
+            <column name="source_id" type="bigint" notnull="true" references="concept.id" foreignKeyName="fk_connections_source_id" foreignKeyIndex="ix_connections_source_id"/>
+        </createTable>
+        <createTable name="settings" pkName="pk_settings">
+            <column name="id" type="bigint" primaryKey="true"/>
+            <column name="max_comps" type="integer" notnull="true"/>
+            <column name="max_spats" type="integer" notnull="true"/>
+            <column name="concepts_per_spat" type="integer" notnull="true"/>
+            <column name="status_comp" type="varchar"/>
+            <column name="status_spat" type="varchar"/>
+            <column name="index" type="integer"/>
+        </createTable>
+        <createTable name="spatial_comparison" pkName="pk_spatial_comparison">
+            <column name="id" type="bigint" primaryKey="true"/>
+            <column name="session_session_id" type="uuid" notnull="true" references="spatial_session.session_id" foreignKeyName="fk_spatial_comparison_session_session_id" foreignKeyIndex="ix_spatial_comparison_session_session_id"/>
+            <column name="duration" type="bigint" notnull="true"/>
+            <column name="konva_result" type="json" notnull="true"/>
+            <column name="scale" type="double" notnull="true"/>
+            <column name="dim_x" type="integer" notnull="true"/>
+            <column name="dim_y" type="integer" notnull="true"/>
+            <column name="created" type="timestamp" notnull="true"/>
+            <column name="modified" type="timestamp" notnull="true"/>
+        </createTable>
+        <createTable name="spatial_comparison_concept" pkName="pk_spatial_comparison_concept">
+            <column name="spatial_comparison_id" type="bigint" notnull="true" primaryKey="true"/>
+            <column name="concept_id" type="bigint" notnull="true" primaryKey="true"/>
+            <foreignKey name="fk_spatial_comparison_concept_spatial_comparison" columnNames="spatial_comparison_id" refColumnNames="id" refTableName="spatial_comparison" indexName="ix_spatial_comparison_concept_spatial_comparison"/>
+            <foreignKey name="fk_spatial_comparison_concept_concept" columnNames="concept_id" refColumnNames="id" refTableName="concept" indexName="ix_spatial_comparison_concept_concept"/>
+        </createTable>
+        <createTable name="spatial_comparison_clicks_per_concept" pkName="pk_spatial_comparison_clicks_per_concept">
+            <column name="spatial_comparison_id" type="bigint" notnull="true" references="spatial_comparison.id" foreignKeyName="fk_spatial_comparison_clicks_per_concept_spatial_comparis_1" foreignKeyIndex="ix_spatial_comparison_clicks_per_concept_spatial_comparis_1"/>
+            <column name="value" type="integer" notnull="true"/>
+        </createTable>
+        <createTable name="spatial_node_tracked" pkName="pk_spatial_node_tracked">
+            <column name="id" type="bigint" primaryKey="true"/>
+            <column name="spatial_comparison_id" type="bigint" notnull="true" references="spatial_comparison.id" foreignKeyName="fk_spatial_node_tracked_spatial_comparison_id" foreignKeyIndex="ix_spatial_node_tracked_spatial_comparison_id"/>
+            <column name="name" type="varchar" notnull="true"/>
+            <column name="x" type="double" notnull="true"/>
+            <column name="y" type="double" notnull="true"/>
+            <column name="drag_start" type="bigint"/>
+            <column name="drag_stop" type="bigint"/>
+            <column name="old_x" type="double"/>
+            <column name="old_y" type="double"/>
+        </createTable>
+        <createTable name="spatial_pos" pkName="pk_spatial_pos">
+            <column name="id" type="bigint" primaryKey="true"/>
+            <column name="spatial_comparison_id" type="bigint" notnull="true" references="spatial_comparison.id" foreignKeyName="fk_spatial_pos_spatial_comparison_id" foreignKeyIndex="ix_spatial_pos_spatial_comparison_id"/>
+            <column name="x" type="double" notnull="true"/>
+            <column name="y" type="double" notnull="true"/>
+        </createTable>
+        <createTable name="spatial_session" identityType="external" pkName="pk_spatial_session">
+            <column name="session_id" type="uuid" primaryKey="true" identity="true"/>
+            <column name="delete_flag" type="boolean" defaultValue="false" notnull="true"/>
+            <column name="created" type="timestamp" notnull="true"/>
+        </createTable>
+    </changeSet>
+</migration>

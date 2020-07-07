@@ -33,6 +33,8 @@
                 completedSpatSessions: [],
                 status_comp: "",
                 status_spat: "",
+                selectedCompId: [],
+                selectedSpatId: [],
                 options: {}
             }
         },
@@ -111,11 +113,15 @@
             hideUncompleted() {
                 if (!JSON.parse(this.$cookies.get("hide-uncompleted"))) {
                     if (this.status_spat === 'spat_accepted' && this.status_comp === 'comp_not_accepted') {
+                        this.completedSpatSessions = this.completedSpatSessions.filter(o1 => !this.selectedSpatId.some(o2 => o1.id === o2));
                         this.$refs.adminSpatial.items = this.completedSpatSessions;
                     } else if (this.status_comp === 'comp_accepted' && this.status_spat === 'spat_not_accepted') {
+                        this.completedCompSessions = this.completedCompSessions.filter(o1 => !this.selectedCompId.some(o2 => o1.id === o2));
                         this.$refs.adminComparison.items = this.completedCompSessions;
                     } else {
+                        this.completedCompSessions = this.completedCompSessions.filter(o1 => !this.selectedCompId.some(o2 => o1.id === o2));
                         this.$refs.adminComparison.items = this.completedCompSessions;
+                        this.completedSpatSessions = this.completedSpatSessions.filter(o1 => !this.selectedSpatId.some(o2 => o1.id === o2));
                         this.$refs.adminSpatial.items = this.completedSpatSessions;
                     }
                     this.$cookies.set("hide-uncompleted", this.toggle);
@@ -137,47 +143,47 @@
             deleteSessions() {
                 //array with selected item id's that should be removed
                 if (this.status_spat === 'spat_accepted' && this.status_comp === 'comp_not_accepted') {
-                    let selectedSpatId = this.$refs.adminSpatial.selectedSpatId;
-                    this.$refs.adminSpatial.items = this.spatItems.filter(o1 => !selectedSpatId.some(o2 => o1.id === o2));
-                    this.spatItems = this.spatItems.filter(o1 => !selectedSpatId.some(o2 => o1.id === o2));
+                    this.selectedSpatId = this.$refs.adminSpatial.selectedSpatId;
+                    this.$refs.adminSpatial.items = this.spatItems.filter(o1 => !this.selectedSpatId.some(o2 => o1.id === o2));
+                    this.spatItems = this.spatItems.filter(o1 => !this.selectedSpatId.some(o2 => o1.id === o2));
 
                     this.options = {
                         method: 'POST',
                         header: {'Content-Type': 'application/json'},
                         body: JSON.stringify({
                             resultComp: [],
-                            resultSpat: selectedSpatId
+                            resultSpat: this.selectedSpatId
                         })
                     };
                 } else if (this.status_comp === 'comp_accepted' && this.status_spat === 'spat_not_accepted') {
-                    let selectedCompId = this.$refs.adminComparison.selectedCompId;
-                    this.$refs.adminComparison.items = this.compItems.filter(o1 => !selectedCompId.some(o2 => o1.id === o2));
-                    this.spatItems = this.spatItems.filter(o1 => !selectedSpatId.some(o2 => o1.id === o2));
+                    this.selectedCompId = this.$refs.adminComparison.selectedCompId;
+                    this.$refs.adminComparison.items = this.compItems.filter(o1 => !this.selectedCompId.some(o2 => o1.id === o2));
+                    this.compItems = this.compItems.filter(o1 => !this.selectedCompId.some(o2 => o1.id === o2));
 
                     this.options = {
                         method: 'POST',
                         header: {'Content-Type': 'application/json'},
                         body: JSON.stringify({
-                            resultComp: selectedCompId,
+                            resultComp: this.selectedCompId,
                             resultSpat: []
                         })
                     };
                 } else {
-                    let selectedCompId = this.$refs.adminComparison.selectedCompId;
-                    let selectedSpatId = this.$refs.adminSpatial.selectedSpatId;
+                    this.selectedCompId = this.$refs.adminComparison.selectedCompId;
+                    this.selectedSpatId = this.$refs.adminSpatial.selectedSpatId;
 
                     //filter for matching item ids and return the list with items without them
-                    this.$refs.adminComparison.items = this.compItems.filter(o1 => !selectedCompId.some(o2 => o1.id === o2));
-                    this.$refs.adminSpatial.items = this.spatItems.filter(o1 => !selectedSpatId.some(o2 => o1.id === o2));
-                    this.compItems = this.compItems.filter(o1 => !selectedCompId.some(o2 => o1.id === o2));
-                    this.spatItems = this.spatItems.filter(o1 => !selectedSpatId.some(o2 => o1.id === o2));
+                    this.$refs.adminComparison.items = this.compItems.filter(o1 => !this.selectedCompId.some(o2 => o1.id === o2));
+                    this.$refs.adminSpatial.items = this.spatItems.filter(o1 => !this.selectedSpatId.some(o2 => o1.id === o2));
+                    this.compItems = this.compItems.filter(o1 => !this.selectedCompId.some(o2 => o1.id === o2));
+                    this.spatItems = this.spatItems.filter(o1 => !this.selectedSpatId.some(o2 => o1.id === o2));
 
                     this.options = {
                         method: 'POST',
                         header: {'Content-Type': 'application/json'},
                         body: JSON.stringify({
-                            resultComp: selectedCompId,
-                            resultSpat: selectedSpatId
+                            resultComp: this.selectedCompId,
+                            resultSpat: this.selectedSpatId
                         })
                     };
                 }

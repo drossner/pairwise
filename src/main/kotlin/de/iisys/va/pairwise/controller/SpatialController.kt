@@ -22,7 +22,7 @@ import javax.persistence.PersistenceException
 object SpatialController {
 
     fun default(ctx: Context) {
-        val init = ctx.sessionAttribute<Boolean>("initSpatial") ?: false
+        val init = ctx.sessionAttribute<Boolean>("initSpat") ?: false
         if (init.not()) initSesstion(ctx)
         VueComponent("spatial-view").handle(ctx)
     }
@@ -136,7 +136,7 @@ object SpatialController {
         }
 
         ctx.sessionAttribute("spatialSession", session)
-        ctx.sessionAttribute("initSpatial", true)
+        ctx.sessionAttribute("initSpat", true)
         DB.save(session)
     }
 
