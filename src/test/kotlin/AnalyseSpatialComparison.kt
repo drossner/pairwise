@@ -75,7 +75,10 @@ fun main() {
 }
 
 
-fun averageRating(groupedSpatialDistances: Map<MutableList<String>, Int>, sorted: MutableList<Triple<String, MutableList<String>, MutableList<Double>>>): MutableList<Triple<String, MutableList<String>, MutableList<Double>>> {
+fun averageRating(
+    groupedSpatialDistances: Map<MutableList<String>, Int>,
+    sorted: MutableList<Triple<String, MutableList<String>, MutableList<Double>>>
+): MutableList<Triple<String, MutableList<String>, MutableList<Double>>> {
     val list: MutableList<Triple<String, MutableList<String>, MutableList<Double>>> = arrayListOf()
     var sum = 0.0
 
@@ -122,6 +125,8 @@ fun spatialPercentage(
             max = 0.0
         }
     }
+    println("**********************************")
+    println(spatialDistances)
     return spatialDistances
 }
 

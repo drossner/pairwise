@@ -45,6 +45,9 @@
                     </p>
                 </div>
             </div>
+            <div>
+                <csv-downloader v-if="this.$javalin.state.isAdmin"></csv-downloader>
+            </div>
         </div>
     </div>
 </template>

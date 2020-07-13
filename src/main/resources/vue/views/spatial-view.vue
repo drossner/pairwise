@@ -19,6 +19,10 @@
             return {
                 stage: null,
                 concepts: [],
+                node: {
+                    width: 100,
+                    height: 80
+                },
                 timeStamp: 0,
                 clicksPerConcept: [],
                 tracked: [],
@@ -72,7 +76,6 @@
                 else if(w >= 992) this.stage.scale({x: 1, y: 1});
                 //$.toast('Width: '+w);
                 this.stage.batchDraw();
-                //console.log(this.stage.scale());
             },
             createPollCanvas: function (containerID) {
                 const stage = new Konva.Stage({
@@ -150,7 +153,7 @@
                 return lineArr;
             },
             createNode: function (text, x, y) {
-                const width = 100, height = 80;
+                const width = this.node.width, height = this.node.height;
                 const group = new Konva.Group({
                     x: x, y: y,
                     draggable: true
@@ -226,7 +229,9 @@
                         konvaJson: konvaJson,
                         positions: poss,
                         clicksPerConcept: this.clicksPerConcept,
-                        tracked: this.tracked
+                        tracked: this.tracked,
+                        nodeWidth: this.node.width,
+                        nodeHeight: this.node.height
                     })
                 })
                     .then(res => res.json())

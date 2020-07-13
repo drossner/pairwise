@@ -27,11 +27,13 @@ class SpatialComparison: BaseComparison() {
     val tracked: MutableList<SpatialNodeTracked> = LinkedList()
     @ElementCollection
     val clicksPerConcept: MutableList<Int> = LinkedList()
+    var nodeWidth: Int? = 0
+    var nodeHeight: Int? = 0
 
 }
 
 @Entity
-data class SpatialPos(@Id val id: Long = 0, var x: Double, var y: Double)
+data class SpatialPos(@Id val id: Long = 0, var x: Double, var y: Double, @OneToOne @JoinColumn(name="CONCEPT_ID") val concept: Concept?)
 
 @Entity
 data class SpatialNodeTracked(@Id val id: Long = 0,

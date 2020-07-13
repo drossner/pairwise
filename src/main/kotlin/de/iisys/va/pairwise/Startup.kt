@@ -1,10 +1,7 @@
 package de.iisys.va.pairwise
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import de.iisys.va.pairwise.controller.AdminController
-import de.iisys.va.pairwise.controller.MainController
-import de.iisys.va.pairwise.controller.SimulationController
-import de.iisys.va.pairwise.controller.SpatialController
+import de.iisys.va.pairwise.controller.*
 import de.iisys.va.pairwise.domain.Settings
 import de.iisys.va.pairwise.domain.pair.ComparsionSession
 import de.iisys.va.pairwise.domain.spatial.SpatialSession
@@ -105,7 +102,7 @@ fun main() {
     app.get("/admin/api/getspatialsessions", AdminController::getSpatialSessions)
     app.get("/admin/api/spatsession/:sessionId", AdminController::getSpatialComp)
     app.get("/admin/api/spatsession/:sessionId/finishedcomps", AdminController::getSpatFinished)
-    //app.get("/api/getstates", MainController::getPollStates)
+    app.get("/admin/api/download", DownloadController::download)
 
     app.post("/admin/api/protected/delete", AdminController::delete)
 
