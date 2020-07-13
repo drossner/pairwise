@@ -115,7 +115,6 @@ object SpatialController {
     private fun initSesstion(ctx: Context) {
         val concept = DB.find(Concept::class.java).findList()
         val connections = DB.find(Connections::class.java).findList()
-        connections
         var plannedComps = Conf.get().maxSpats
         val neededConcepts = plannedComps * Conf.get().conceptsPerSpat
         if (concept.size < neededConcepts) {
@@ -129,7 +128,7 @@ object SpatialController {
                 //val startIndex = i * Conf.get().conceptsPerSpat
                 //val endIndex = startIndex + Conf.get().conceptsPerSpat
                 //it.concepts.addAll(concepts.subList(startIndex, endIndex))
-                it.concepts.addAll(connectionsHelper(connections) as Collection<Concept>)
+                it.concepts.addAll(connectionsHelper(connections) as List<Concept>)
                 it.session = session
             }
             session.comparisons.add(comp)
@@ -150,8 +149,9 @@ object SpatialController {
                 sc.dimX = data.dimX
                 sc.dimY = data.dimY
                 sc.duration = data.duration
+                var i = 0
                 sc.positions.addAll(data.positions.map { pos ->
-                    SpatialPos(x = pos.x, y = pos.y)
+                    SpatialPos(x = pos.x, y = pos.y, concept = sc.concepts[i++])
                 })
                 sc.tracked.addAll(data.tracked.map { t ->
                     SpatialNodeTracked(
@@ -164,6 +164,8 @@ object SpatialController {
                         oldY = t.oldY
                     )
                 })
+                sc.nodeWidth = data.nodeWidth
+                sc.nodeHeight = data.nodeHeight
                 sc.konvaResult = EJson.parseObject(data.konvaJson)
                 sc.scale = data.scale
                 sc.clicksPerConcept.addAll(data.clicksPerConcept)

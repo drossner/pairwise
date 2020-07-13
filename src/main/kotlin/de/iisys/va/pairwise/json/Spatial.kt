@@ -10,7 +10,9 @@ data class SpatialResponse(
     val konvaJson: String,
     val positions: MutableList<Pos>,
     val clicksPerConcept: MutableList<Int>,
-    val tracked: MutableList<SpatialNodeTracked>
+    val tracked: MutableList<SpatialNodeTracked>,
+    val nodeWidth: Int? = 0,
+    val nodeHeight: Int? = 0
 )
 
 data class Pos(

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<migration xmlns="http://ebean-orm.github.io/xml/ns/dbmigration">
+    <changeSet type="apply">
+        <addColumn tableName="spatial_pos">
+            <column name="CONCEPT_ID" type="bigint" uniqueOneToOne="uq_spatial_pos_concept_id" references="concept.id" foreignKeyName="fk_spatial_pos_concept_id"/>
+        </addColumn>
+    </changeSet>
+</migration>
