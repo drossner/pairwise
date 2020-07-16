@@ -164,13 +164,34 @@ object SpatialController {
                         oldY = t.oldY
                     )
                 })
+
+                val usedConcept = sc.positions
+                val trackedConcepts = sc.tracked.map { it.name }
+                for (conceptName in usedConcept) {
+                    if (!trackedConcepts.contains((conceptName.concept?.name))) {
+                        sc.tracked.add(
+                            SpatialNodeTracked(
+                                name = conceptName.concept?.name!!,
+                                x = conceptName.x,
+                                y = conceptName.y,
+                                dragStart = 0,
+                                dragStop = 0,
+                                oldX = conceptName.x,
+                                oldY = conceptName.y
+                            )
+                        )
+                    }
+                }
+
                 sc.nodeWidth = data.nodeWidth
                 sc.nodeHeight = data.nodeHeight
                 sc.konvaResult = EJson.parseObject(data.konvaJson)
                 sc.scale = data.scale
                 sc.clicksPerConcept.addAll(data.clicksPerConcept)
             }
+
         } else throw BadRequestResponse("Invalid question number")
+
         session.currQst++
         DB.update(session)
         val finished = session.currQst >= session.comparisons.size
