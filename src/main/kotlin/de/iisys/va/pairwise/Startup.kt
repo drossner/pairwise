@@ -103,6 +103,7 @@ fun main() {
     app.get("/admin/api/spatsession/:sessionId", AdminController::getSpatialComp)
     app.get("/admin/api/spatsession/:sessionId/finishedcomps", AdminController::getSpatFinished)
     app.get("/admin/api/download", DownloadController::download)
+    app.get("/admin/api/replay", AdminController::replay)
 
     app.post("/admin/api/protected/delete", AdminController::delete)
 

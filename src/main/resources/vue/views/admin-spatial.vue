@@ -15,6 +15,10 @@
             <template v-slot:cell(delete)="item" v-if="isAdminFunc()">
                 <b-form-checkbox type="checkbox" :value="item.item.id" v-model="selectedSpatId"></b-form-checkbox>
             </template>
+            <template v-slot:cell(replay)="row">
+                <!--TODO: link to replay-->
+                <b-button size="sm">Replay</b-button>
+            </template>
 
             <template v-slot:table-busy>
                 <div class="text-center my-2">
@@ -54,7 +58,8 @@
                         {key: "concept_count", sortable: true},
                         {key: "comp_count", sortable: true},
                         {key: "avg_duration", sortable: true, label: "Average Duration"},
-                        {key: "delete", label: "Delete", sortable: false}
+                        {key: "delete", label: "Delete", sortable: false},
+                        {key: "Replay", label: "Replay", sortable: false}
                     ]
                 }
             },
