@@ -245,6 +245,7 @@ object DownloadController {
                 }
                 count += connectionsPerTest
                 max = 0.0
+                maxNearest = 0.0
             }
         }
         return spatialDistances
