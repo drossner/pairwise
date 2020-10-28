@@ -8,6 +8,7 @@ import de.iisys.va.pairwise.domain.pair.query.QComparsionSession
 import de.iisys.va.pairwise.domain.query.QConcept
 import de.iisys.va.pairwise.domain.query.QSettings
 import de.iisys.va.pairwise.domain.spatial.SpatialComparison
+import de.iisys.va.pairwise.domain.spatial.query.QSpatialNodeTracked
 import de.iisys.va.pairwise.domain.spatial.query.QSpatialSession
 import de.iisys.va.pairwise.json.*
 import io.ebean.DB
@@ -133,6 +134,12 @@ object AdminController {
                 comp.clicksPerConcept.toIntArray()
             )
         )
+    }
+
+    fun replay(ctx: Context) {
+        val tracked = QSpatialNodeTracked().findList()
+
+        //TODO: controller for replay
     }
 
     fun getSpatFinished(ctx: Context) {
