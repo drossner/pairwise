@@ -2,12 +2,10 @@ version: '3'
 
 services:
   postgres:
-    image: "postgres:latest"
+    image: "postgres:11"
     container_name: localdocker
     ports:
       - "5432:5432"
     environment:
       POSTGRES_PASSWORD: "dev"
       POSTGRES_USER: "postgres"
-    volumes:
-      - "../src/main/resources/init.db:/docker-entrypoint-initdb.d"

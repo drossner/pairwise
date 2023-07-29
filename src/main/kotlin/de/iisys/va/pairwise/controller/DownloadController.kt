@@ -25,6 +25,7 @@ private const val SPATIAL_HEADER =
 private const val CONCEPT_INFOS_HEADER = "Concept,ConceptTouched,ConceptUsed"
 private const val TRACKED_NODES_HEADER = "Concept,x,y,dragStart,dragStop,oldX,oldY"
 private const val WIKI_CONNECTIONS_HEADER = "id,Source,Target,sum,weight"
+private const val PAIR_HEADER = "SessionID,ConceptA,ConceptB,Weight,Duration,QstNr"
 
 object DownloadController {
     fun download(ctx: Context) {
@@ -67,6 +68,26 @@ object DownloadController {
         val relativeDistances = relativeDistance(spatialDistances, connectionsPerTest)
         //concept name, concept touched, concept used
         val conceptInformation = conceptInformations(positions, trackedNodes)
+
+        val comparisonsText = StringBuilder(PAIR_HEADER)
+        comparisonsText.append("\n")
+        comparisonSessions.forEach { session ->
+            val id = session.sessionId
+            session.comparisons.forEach { comp ->
+                comparisonsText.append(id)
+                comparisonsText.append(",")
+                comparisonsText.append(comp.conceptA?.name)
+                comparisonsText.append(",")
+                comparisonsText.append(comp.conceptB?.name)
+                comparisonsText.append(",")
+                comparisonsText.append(comp.rating)
+                comparisonsText.append(",")
+                comparisonsText.append(comp.duration)
+                comparisonsText.append(",")
+                comparisonsText.append(comp.qstNr)
+                comparisonsText.append("\n")
+            }
+        }
 
         val sbWikiConnections = StringBuilder(WIKI_CONNECTIONS_HEADER)
         sbWikiConnections.append("\n")
@@ -159,6 +180,9 @@ object DownloadController {
             it.closeEntry()
             it.putNextEntry(ZipEntry("Wiki_Connections.csv"))
             it.write(sbWikiConnections.toString().toByteArray())
+            it.closeEntry()
+            it.putNextEntry(ZipEntry("Comparison_Information.csv"))
+            it.write(comparisonsText.toString().toByteArray())
             it.closeEntry()
         }
         try {
