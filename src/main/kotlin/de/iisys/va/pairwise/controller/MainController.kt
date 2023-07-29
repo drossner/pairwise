@@ -41,16 +41,26 @@ object MainController {
 
         //set up domain objects
         val comparsionSession = ComparsionSession()
-        val endIndex = minOf(Conf.get().maxComps * 2, concept.size)
-        val rand = concept.shuffled().subList(0,endIndex)
-        for (i in 0 until rand.size-1 step 2){
+
+        //create a list of ALL possible pairs, then shuffle, then select the first x (or all)
+        val pairList = mutableListOf<ConceptPair>()
+        for(i in 0 until concept.size - 1) {
+            for (k in i + 1 until concept.size) {
+                pairList.add(ConceptPair(concept[i], concept[k]))
+            }
+        }
+
+        val endIndex = minOf(Conf.get().maxComps, pairList.size)
+        val rand = pairList.shuffled().subList(0,endIndex)
+        rand.forEach { randomPair ->
             val comp = ConceptComparison().also {
-                it.conceptA = rand[i]
-                it.conceptB = rand[i+1]
+                it.conceptA = randomPair.conceptA
+                it.conceptB = randomPair.conceptB
                 it.session = comparsionSession
             }
             comparsionSession.comparisons.add(comp)
         }
+
         DB.save(comparsionSession)
         ctx.sessionAttribute("compSession", comparsionSession)
         ctx.sessionAttribute("init", true)

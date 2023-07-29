@@ -33,11 +33,11 @@ detach(spatial_Session_data)
 
 filtered <- spatial_Session_data %>%
   select(ConceptA, ConceptB, AvgPercentage) %>%
-  mutate(Ordered = ifelse(as.character(ConceptB) < as.character(ConceptA), paste(as.character(ConceptB),as.character(ConceptA)), paste(as.character(ConceptA),as.character(ConceptB)))) %>%
+  mutate(Ordered = ifelse(as.character(ConceptB) < as.character(ConceptA), paste(as.character(ConceptB),as.character(ConceptA), sep=";"), paste(as.character(ConceptA),as.character(ConceptB), sep=";"))) %>%
   group_by(Ordered) %>%
-  summarise(n=n(), AvgPercentage = mean(AvgPercentage)) %>%
+  summarise(n=n(), AvgPercentage = 1-mean(AvgPercentage)) %>%
   arrange(desc(AvgPercentage)) %>%
-  separate(Ordered, c("A", "B"), " ")
+  separate(Ordered, c("A", "B"), ";")
 
 qqnorm(filtered$AvgPercentage)
 qqline(filtered$AvgPercentage)
@@ -71,3 +71,4 @@ boxplot(spatComp$ratings)
 shapiro.test(spatComp$ratings)
   plot(density(spatComp$dist))
      
+  

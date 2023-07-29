@@ -100,8 +100,8 @@
                                   :min="1"
                                   step="1">
                     </b-form-input>
-                    <b-form-invalid-feedback id="number-of-pair-feedback">Number must be greater than 1 and not more than the half
-                        quantity.
+                    <b-form-invalid-feedback id="number-of-pair-feedback">
+                      Number must be greater than 1 and not more than (n * (n - 1)) / 2
                     </b-form-invalid-feedback>
                 </div>
             </b-col>
@@ -175,13 +175,13 @@
 
         computed: {
             numberOfCompsState() {
-                return ((this.number_of_comparisons * 2 <= this.quantity) && (this.number_of_comparisons >= 1))
+                return ((this.number_of_comparisons <= this.quantity * (this.quantity - 1) / 2) && (this.number_of_comparisons >= 1))
             },
             quantityState() {
                 return this.quantity >= 2 && this.quantity <= this.entities.length
             },
             numberOfTestsState() {
-                return this.number_of_tests * this.nodes_per_test <= this.quantity
+                return true //this.number_of_tests * this.nodes_per_test <= this.quantity
             }
         },
 

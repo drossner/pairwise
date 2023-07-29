@@ -115,20 +115,44 @@ object SpatialController {
     private fun initSesstion(ctx: Context) {
         val concept = DB.find(Concept::class.java).findList()
         val connections = DB.find(Connections::class.java).findList()
-        var plannedComps = Conf.get().maxSpats
-        val neededConcepts = plannedComps * Conf.get().conceptsPerSpat
-        if (concept.size < neededConcepts) {
-            plannedComps = concept.size / Conf.get().conceptsPerSpat
-            //neededConcepts = plannedComps * Conf.get().conceptsPerSpat
-        }
-        //val concepts = concept.shuffled().subList(0, neededConcepts)
+
+        val plannedComps = Conf.get().maxSpats
+        val conceptsPerComp = Conf.get().conceptsPerSpat
+
+        // "n over k"
+        val takenConnections = mutableSetOf<Connections>() //store already evaluated connections to skip them!
+        var shuffledConnections = connections.shuffled()
+
         val session = SpatialSession()
         for (i in 0 until plannedComps) {
             val comp = SpatialComparison().also {
-                //val startIndex = i * Conf.get().conceptsPerSpat
-                //val endIndex = startIndex + Conf.get().conceptsPerSpat
-                //it.concepts.addAll(concepts.subList(startIndex, endIndex))
-                it.concepts.addAll(connectionsHelper(connections) as List<Concept>)
+                // the following line uses the complex code above to evenly distribute over LARGE data sets. We change that to cover smaller data sets.
+                // it.concepts.addAll(connectionsHelper(connections) as List<Concept>)
+
+                val concepts = mutableSetOf<Concept>()
+                while(concepts.size < conceptsPerComp) {
+                    if(concepts.size + 2 <= conceptsPerComp) { // 2 missing, we can savely take the next available connections
+                        shuffledConnections.find { !takenConnections.contains(it) }?.also {
+                            concepts.add(it.source!!)
+                            concepts.add(it.target!!)
+                            takenConnections.add(it)
+                        } ?: kotlin.run {
+                            takenConnections.clear()
+                            shuffledConnections = connections.shuffled()
+                        }
+                    } else { // exactly one concept is missing, therefore we refine the find query
+                        shuffledConnections.find { !takenConnections.contains(it) && (concepts.contains(it.source) xor concepts.contains(it.target)) }?.also {
+                            concepts.add(it.source!!) //one will fail cause xor
+                            concepts.add(it.target!!) //one will fail cause xor
+                            takenConnections.add(it)
+                        } ?: kotlin.run {
+                            takenConnections.clear()
+                            shuffledConnections = connections.shuffled()
+                        }
+                    }
+                }
+
+                it.concepts.addAll(concepts.toList())
                 it.session = session
             }
             session.comparisons.add(comp)
