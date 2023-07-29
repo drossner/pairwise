@@ -13,11 +13,11 @@ singleSessions <- read.csv("src/singleSessions.csv", sep = ",", fileEncoding = "
 
 filtered <- singleSessions %>%
   select(ConceptA, ConceptB, Rating) %>%
-  mutate(Ordered = ifelse(as.character(ConceptB) < as.character(ConceptA), paste(as.character(ConceptB),as.character(ConceptA)), paste(as.character(ConceptA),as.character(ConceptB)))) %>%
+  mutate(Ordered = ifelse(as.character(ConceptB) < as.character(ConceptA), paste(as.character(ConceptB),as.character(ConceptA),sep = ";"), paste(as.character(ConceptA),as.character(ConceptB), sep=";"))) %>%
   group_by(Ordered) %>%
   summarise(Rating = mean(Rating), n = n()) %>%
   arrange(desc(n)) %>%
-  separate(Ordered, c("A", "B"), " ")
+  separate(Ordered, c("A", "B"), ";")
   
 
 
