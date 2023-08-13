@@ -11,6 +11,8 @@ library(tidyr)
 sessions <- read.csv("src/completedSessions.csv", sep = ",", fileEncoding = "UTF-8")
 singleSessions <- read.csv("src/singleSessions.csv", sep = ",", fileEncoding = "UTF-8")
 
+
+
 filtered <- singleSessions %>%
   select(ConceptA, ConceptB, Rating) %>%
   mutate(Ordered = ifelse(as.character(ConceptB) < as.character(ConceptA), paste(as.character(ConceptB),as.character(ConceptA),sep = ";"), paste(as.character(ConceptA),as.character(ConceptB), sep=";"))) %>%

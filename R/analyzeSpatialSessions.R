@@ -10,7 +10,7 @@ library(nortest)
 library(exptest)
 library(tidyr)
 
-spatial_Session_data <- read.csv("./src/Spatial_Data.csv", sep = ",", fileEncoding = "UTF-8")
+spatial_Session_data <- read.csv("./R/src/Spatial_Data.csv", sep = ",", fileEncoding = "UTF-8")
 boxplot(spatial_Session_data$Duration/1000 ~ spatial_Session_data$QstNr, xlab="instance number", ylab="duration in s")
   mean(spatial_Session_data$Duration/1000)
 median(spatial_Session_data$Duration/1000)
