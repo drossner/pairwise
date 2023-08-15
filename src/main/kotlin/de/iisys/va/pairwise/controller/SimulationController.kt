@@ -14,7 +14,7 @@ import kotlin.math.sqrt
 object SimulationController {
 
     fun getSimulationData(ctx: Context){
-        val sessions = QSpatialSession().findList()
+        val sessions = QComparsionSession().findList()
         val completedSessions = sessions.filter { !it.comparisons.any { it.duration <= 0 } }
 
         //do not care about sessions any more
@@ -30,19 +30,16 @@ object SimulationController {
                 return Objects.hash(min(a.id, b.id), max(a.id, b.id))
             }
         }
+        //define distance mapped to 0 and distance mapped to 1, remaining is scaled lineaer!
+        val minDistance = 0.0
+        val maxDistance = 200.0 //this one may depend on some property we do not know yet..
+
         val edgeToDistanceMap = HashMap<ConceptPair, MutableList<Double>>()
         comparisons.forEach { comp ->
-            for(i in 0 until comp.concepts.size - 1){
-                for(k in i + 1 until comp.concepts.size){
-                    val pair = ConceptPair(comp.concepts[i], comp.concepts[k])
-                    //calc distance
-                    val distx = comp.positions[i].x - comp.positions[k].x
-                    val disty = comp.positions[i].y - comp.positions[k].y
-                    val dist = sqrt(distx * distx + disty * disty)
-
-                    edgeToDistanceMap.getOrPut(pair){ LinkedList() }.add(dist)
-                }
-            }
+            val pair = ConceptPair(comp.conceptA!!, comp.conceptB!!)
+            val weight = (comp.rating - 1) / 9.0
+            val dist = weight * (maxDistance - minDistance) + minDistance
+            edgeToDistanceMap.getOrPut(pair) { LinkedList() }.add(dist)
         }
         val simulationDataList =  edgeToDistanceMap.map {it ->
             SimulationData(it.key.a.name!!, it.key.b.name!!, it.value.average(), it.value.size)
