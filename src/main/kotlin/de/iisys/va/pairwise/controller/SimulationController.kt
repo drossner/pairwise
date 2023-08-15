@@ -32,13 +32,13 @@ object SimulationController {
         }
         //define distance mapped to 0 and distance mapped to 1, remaining is scaled lineaer!
         val minDistance = 0.0
-        val maxDistance = 200.0 //this one may depend on some property we do not know yet..
+        val maxDistance = 400.0 //this one may depend on some property we do not know yet..
 
         val edgeToDistanceMap = HashMap<ConceptPair, MutableList<Double>>()
         comparisons.forEach { comp ->
             val pair = ConceptPair(comp.conceptA!!, comp.conceptB!!)
             val weight = (comp.rating - 1) / 9.0
-            val dist = weight * (maxDistance - minDistance) + minDistance
+            val dist = (1.0 - weight) * (maxDistance - minDistance) + minDistance
             edgeToDistanceMap.getOrPut(pair) { LinkedList() }.add(dist)
         }
         val simulationDataList =  edgeToDistanceMap.map {it ->
