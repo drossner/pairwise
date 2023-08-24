@@ -72,6 +72,9 @@ norm_values %>%
   geom_jitter(size=1, alpha=0.8) +
   xlab("")
 
+test <- norm_values %>% mutate(spat = (spat - 0.15) / (0.99 - 0.15)) # this line is to check the normalized lm
+lm(test$spat ~ test$comp)
+
 norm_values %>%
   ggplot(aes(x=spat, y=comp)) +
   geom_smooth(method=lm) +
@@ -89,21 +92,26 @@ cor.test(norm_values$spat, norm_values$comp, method = "spearman")
 
 # inter rater aggrement
 library("irr")
+library("psych")
 comp_values <- read.csv("R/csv-export/Comparison_Information.csv", sep = ",", fileEncoding = "UTF-8")
 spat_values <- read.csv("R/csv-export/Spatial_Information.csv", sep = ",", fileEncoding = "UTF-8")
 
 ratings <- comp_values %>%
-  group_by(ConceptA, ConceptB) %>%
   arrange(SessionID) %>%
+  group_by(ConceptA, ConceptB) %>%
   #no clue how do that dynamically.. :(
-  summarise(Weight_Mean = mean(Weight), n = n(), rater1 = nth(Weight, 1), rater2 = nth(Weight, 2), rater3 = nth(Weight, 3), rater4 = nth(Weight, 4), rater5 = nth(Weight, 5), rater6 = nth(Weight, 6), rater7 = nth(Weight, 7))
+  summarise(.groups = "keep", Weight_Mean = mean(Weight), n = n(), rater1 = nth(Weight, 1), rater2 = nth(Weight, 2), rater3 = nth(Weight, 3), rater4 = nth(Weight, 4), rater5 = nth(Weight, 5), rater6 = nth(Weight, 6), rater7 = nth(Weight, 7))
 
-cleaned_ratings <- ratings %>% select(contains("rater"))
+cleaned_ratings <- ratings %>% ungroup() %>% select(contains("rater"))
+
 
 icc(
-  cleaned_ratings[,-1], model = "twoway",
+  cleaned_ratings, model = "twoway",
   type = "agreement", unit = "single"
 )
+
+cohen.kappa(cleaned_ratings) # weighted kappa, as we have ordinal data
+
 
 # Koo and Li (2016) gives the following suggestion for interpreting ICC (Koo and Li 2016):
 
@@ -185,5 +193,8 @@ test %>%
     aspect.ratio = 1,
     # Hide the legend (optional)
   )
+
+test %>%
+  ggplot(aes(x=mean, y=var)) + geom_point() + geom_smooth()
 
 
